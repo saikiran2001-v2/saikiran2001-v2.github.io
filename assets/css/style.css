@@ -50,6 +50,134 @@
     --accent-glow: rgba(37, 99, 235, 0.2);
 }
 
+/* Theme: Glass (iOS-style Glassmorphism) */
+[data-theme="glass"] {
+    --bg-color: #9ca3af;
+    --surface-color: rgba(255, 255, 255, 0.6);
+    --surface-border: rgba(0, 0, 0, 0.15);
+    --text-main: #111827;
+    --text-muted: #4b5563;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-glow: rgba(59, 130, 246, 0.3);
+}
+
+/* Glass Theme Specific Styles */
+[data-theme="glass"] body {
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%);
+    background-attachment: fixed;
+}
+
+/* Glass effect for cards, navbar, and footer */
+[data-theme="glass"] .card,
+[data-theme="glass"] .project-card,
+[data-theme="glass"] .skill-card,
+[data-theme="glass"] .navbar,
+[data-theme="glass"] footer {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Keep terminal dark and readable */
+[data-theme="glass"] .terminal-window,
+[data-theme="glass"] .terminal-box,
+[data-theme="glass"] .code-display {
+    background: #1f2937 !important;
+    backdrop-filter: none;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="glass"] .terminal-header {
+    background: #111827 !important;
+}
+
+[data-theme="glass"] .btn-primary {
+    background: rgba(59, 130, 246, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(59, 130, 246, 1);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="glass"] .btn-primary:hover {
+    background: rgba(37, 99, 235, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="glass"] .btn-secondary {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: #1f2937;
+}
+
+[data-theme="glass"] .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="glass"] .theme-select {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: #1f2937;
+}
+
+[data-theme="glass"] .theme-select:hover,
+[data-theme="glass"] .theme-select:focus {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="glass"] .theme-select option {
+    background: rgba(255, 255, 255, 0.98);
+    color: #1f2937;
+}
+
+/* Enhanced text contrast for Glass theme */
+[data-theme="glass"] h1,
+[data-theme="glass"] h2,
+[data-theme="glass"] h3 {
+    color: #111827;
+    text-shadow: none;
+}
+
+/* Override gradient text with solid color for readability */
+[data-theme="glass"] .gradient-text {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: #1f2937;
+    color: #1f2937;
+}
+
+[data-theme="glass"] .nav-links a {
+    color: #1f2937;
+}
+
+[data-theme="glass"] .nav-links a:hover {
+    color: #111827;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide decorative blur circles in Glass theme */
+[data-theme="glass"] .blur-circle {
+    display: none;
+}
+
+/* Glass scrolled navbar */
+[data-theme="glass"] .navbar.scrolled {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(40px) saturate(180%);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
 /* Reset & Base */
 * {
     margin: 0;
