@@ -775,7 +775,7 @@ footer {
 }
 
 /* Tablet/Medium Screen Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     .logo {
         z-index: 1001;
     }
