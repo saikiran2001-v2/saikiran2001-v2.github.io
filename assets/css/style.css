@@ -1,15 +1,7 @@
 /* assets/css/style.css */
 
 :root {
-    --bg-color: #0f172a;
-    --surface-color: rgba(30, 41, 59, 0.7);
-    --surface-border: rgba(255, 255, 255, 0.1);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-primary: #3b82f6;
-    --accent-secondary: #8b5cf6;
-    --accent-glow: rgba(59, 130, 246, 0.5);
-
+    /* Fonts & Spacing (Global) */
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Outfit', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -21,6 +13,41 @@
     --spacing-xl: 8rem;
 
     --transition: all 0.3s ease;
+
+    /* Default Theme: Midnight Black */
+    --bg-color: #020617;
+    /* Very dark slate/black */
+    --surface-color: rgba(15, 23, 42, 0.6);
+    --surface-border: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-glow: rgba(59, 130, 246, 0.4);
+}
+
+/* Theme: Blueish (Original) */
+[data-theme="blue"] {
+    --bg-color: #0f172a;
+    --surface-color: rgba(30, 41, 59, 0.7);
+    --surface-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-glow: rgba(59, 130, 246, 0.5);
+}
+
+/* Theme: Light */
+[data-theme="light"] {
+    --bg-color: #f8fafc;
+    --surface-color: rgba(255, 255, 255, 0.8);
+    --surface-border: rgba(0, 0, 0, 0.1);
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --accent-primary: #2563eb;
+    --accent-secondary: #7c3aed;
+    --accent-glow: rgba(37, 99, 235, 0.2);
 }
 
 /* Reset & Base */
@@ -120,9 +147,70 @@ img {
     width: 100%;
     padding: 1.5rem 0;
     backdrop-filter: blur(10px);
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--surface-color);
     z-index: 1000;
     border-bottom: 1px solid var(--surface-border);
+}
+
+/* Theme Toggle Styles */
+.theme-select-wrapper {
+    position: relative;
+    margin-left: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.theme-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.5rem 2.8rem 0.5rem 1.2rem;
+    background: var(--surface-color);
+    color: var(--text-main);
+    border: 1px solid var(--surface-border);
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+    min-width: 130px;
+}
+
+.theme-select:hover,
+.theme-select:focus {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.theme-select option {
+    background: var(--bg-color);
+    color: var(--text-main);
+}
+
+.theme-icon {
+    position: absolute;
+    right: 1.2rem;
+    pointer-events: none;
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.theme-select-wrapper:hover .theme-icon {
+    transform: rotate(180deg);
+}
+
+/* Navbar Scrolled State */
+.navbar.scrolled {
+    background: var(--surface-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Light theme scrolled navbar needs darker shadow */
+[data-theme="light"] .navbar.scrolled {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
 }
 
 .nav-container {
@@ -493,7 +581,7 @@ img {
 
 /* Footer */
 footer {
-    background: #0b1120;
+    background: var(--bg-color);
     padding: var(--spacing-lg) 0 var(--spacing-md);
     border-top: 1px solid var(--surface-border);
 }

@@ -1,6 +1,31 @@
 // assets/js/script.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Management
+    const themeSelect = document.getElementById('theme-select');
+    const root = document.documentElement;
+
+    // Load saved theme or default to '' (Midnight)
+    const currentTheme = localStorage.getItem('theme') || '';
+    if (currentTheme) {
+        root.setAttribute('data-theme', currentTheme);
+    }
+
+    // Set initial dropdown value
+    if (themeSelect) {
+        themeSelect.value = currentTheme || 'midnight';
+
+        themeSelect.addEventListener('change', (e) => {
+            const theme = e.target.value;
+            if (theme === 'midnight') {
+                root.removeAttribute('data-theme');
+                localStorage.removeItem('theme');
+            } else {
+                root.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            }
+        });
+    }
     // Navigation Toggle for Mobile
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
@@ -24,11 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navbar Background on Scroll
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(15, 23, 42, 0.95)';
-            navbar.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            navbar.classList.add('scrolled');
         } else {
-            navbar.style.background = 'rgba(15, 23, 42, 0.8)';
-            navbar.style.boxShadow = 'none';
+            navbar.classList.remove('scrolled');
         }
     });
 
