@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saikiran | Rust Playground</title>
+    <meta name="description" content="Play Rust-based CLI games directly in the browser.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .playground-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .playground-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .terminal-box {
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid #333;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .terminal-content {
+            padding: 1.5rem;
+            color: #d4d4d4;
+            font-size: 0.95rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            /* Preserves explicit newlines but wraps text */
+            word-wrap: break-word;
+            text-align: left;
+        }
+
+        .input-line {
+            display: flex;
+            padding: 0 1.5rem 1.5rem;
+            align-items: center;
+        }
+
+        .cmd-input {
+            background: transparent;
+            border: none;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            flex-grow: 1;
+            outline: none;
+            margin-left: 0.5rem;
+        }
+
+        .source-code-box {
+            background: #282c34;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 600px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #abb2bf;
+        }
+
+        /* Syntax Highlighting */
+        .keyword {
+            color: #c678dd;
+        }
+
+        .string {
+            color: #98c379;
+        }
+
+        .num {
+            color: #d19a66;
+        }
+
+        .comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .func {
+            color: #61afef;
+        }
+
+        .type {
+            color: #e5c07b;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .footer-message {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li><a href="index.html#power-apps">Power Apps</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html" class="active">My Rust Playground</a></li>
+                <li><a href="blog.html">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Playground Section -->
+    <section class="section" style="padding-top: 100px; min-height: 80vh;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Rust <span class="accent">Playground</span></h2>
+                <p class="section-subtitle">Interactive CLI games powered by Rust logic.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchGame('alpha')">Alpha Guess</button>
+                <button class="tab-btn" onclick="switchGame('number')">Number Guess</button>
+            </div>
+
+            <div class="playground-container">
+                <!-- Terminal -->
+                <div class="terminal-box">
+                    <div class="terminal-header"
+                        style="background: #2d2d2d; padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #333;">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="terminal-title" id="terminal-title">user@rust-game:~/alpha_guess</span>
+                    </div>
+                    <!-- Note: Content is empty initially to be filled by JS to avoid whitespace issues -->
+                    <div class="terminal-content" id="terminal-output"></div>
+                    <div class="input-line">
+                        <span class="prompt" style="color: #27c93f; font-weight: bold;">$</span>
+                        <input type="text" class="cmd-input" id="cmd-input" autocomplete="off" autofocus>
+                    </div>
+                </div>
+
+                <!-- Source Code -->
+                <div class="source-code-box">
+                    <pre id="source-code"></pre>
+                </div>
+            </div>
+
+            <div class="footer-message">
+                <p>More games coming soon! Stay tuned.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <a href="mailto:bjsaikiran@gmail.com" class="email-link">bjsaikiran@gmail.com</a>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon"><i
+                        class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank"
+                    class="social-icon"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Jaya Saikiran Banigallapati. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="assets/js/script.js"></script>
+    <script>
+        // --- Game Logic Classes ---
+
+        class AlphaGuessGame {
+            constructor() {
+                this.name = "Alphabets Guessing Game";
+                this.prompt = "Please enter an alphabet or enter 9 to quit:";
+                // Initialize first run
+                this.secretU8 = Math.floor(Math.random() * 26) + 65;
+                console.log("[Alpha] Secret:", String.fromCharCode(this.secretU8));
+                this.gameOver = false;
+            }
+
+            getWelcomeMessage() {
+                return `Welcome to ${this.name}!!\nType 'start' to begin or just start guessing...\n\n${this.prompt}`;
+            }
+
+            reset() {
+                this.secretU8 = Math.floor(Math.random() * 26) + 65;
+                this.gameOver = false;
+                console.log("[Alpha] Secret:", String.fromCharCode(this.secretU8));
+                return `Game Restarted!\n${this.prompt}`;
+            }
+
+            processInput(input) {
+                if (this.gameOver) {
+                    if (input.toLowerCase().startsWith('y')) return this.reset();
+                    return "Thanks for playing! Type 'yes' to play again.";
+                }
+
+                input = input.trim();
+                // Special case for 'start' command in Alpha game (though user said 'start' in welcome msg)
+                if (input.toLowerCase() === 'start') {
+                    return this.prompt;
+                }
+
+                if (input === '9') {
+                    this.gameOver = true;
+                    return "Quitting game... Type 'yes' to restart.";
+                }
+
+                if (!input || !/^[a-zA-Z]$/.test(input)) {
+                    return "Enter a valid alphabet!!!\n" + this.prompt;
+                }
+
+                const guess = input.toUpperCase().charCodeAt(0);
+                const secret = this.secretU8;
+                const distance = Math.abs(guess - secret);
+
+                let response = "";
+
+                if (guess === secret) {
+                    response = "You Win!!!\n\nPlay again? (yes/no)";
+                    this.gameOver = true;
+                } else {
+                    const direction = guess < secret ? "Too small" : "Too big";
+
+                    if (distance === 1) response = `${direction}, but you are BOILING RED HOT!!`;
+                    else if (distance <= 3) response = `${direction}, but you are burning up!!`;
+                    else if (distance <= 6) response = `${direction}, but you are getting very warm!`;
+                    else if (distance <= 10) response = `${direction}, but you are feeling some warmth.`;
+                    else if (distance <= 15) response = `${direction} and it's starting to get chilly.`;
+                    else if (distance <= 20) response = `${direction} and you are shivering... it's cold!`;
+                    else response = `${direction} and you are freezing cold, What are you doing in Arctic?`;
+
+                    response += "\n\n" + this.prompt;
+                }
+                return response;
+            }
+        }
+
+        class NumberGuessGame {
+            constructor() {
+                this.name = "Number Guessing Game";
+                this.prompt = "Please input your guess (1-100):";
+                this.secretNumber = Math.floor(Math.random() * 100) + 1;
+                console.log("[Number] Secret:", this.secretNumber);
+                this.gameOver = false;
+            }
+
+            getWelcomeMessage() {
+                return `Welcome to ${this.name}!!\nI have generated a random number between 1 and 100.\n\n${this.prompt}`;
+            }
+
+            reset() {
+                this.secretNumber = Math.floor(Math.random() * 100) + 1;
+                this.gameOver = false;
+                console.log("[Number] Secret:", this.secretNumber);
+                return `Game Restarted!\n${this.prompt}`;
+            }
+
+            processInput(input) {
+                if (this.gameOver) {
+                    if (input.toLowerCase().startsWith('y')) return this.reset();
+                    return "Thanks for playing! Type 'yes' to play again.";
+                }
+
+                const guess = parseInt(input.trim());
+
+                if (isNaN(guess)) {
+                    return "Please type a number!\n" + this.prompt;
+                }
+
+                const distance = Math.abs(guess - this.secretNumber);
+
+                let response = "";
+
+                if (guess === this.secretNumber) {
+                    response = "You Win!!!\n\nPlay again? (yes/no)";
+                    this.gameOver = true;
+                } else {
+                    const direction = guess < this.secretNumber ? "Too small" : "Too big";
+
+                    if (distance === 1) response = `${direction}, but you are BOILING RED HOT!!`;
+                    else if (distance <= 3) response = `${direction}, but you are burning up!!`;
+                    else if (distance <= 6) response = `${direction}, but you are getting very warm!`;
+                    else if (distance <= 10) response = `${direction}, but you are feeling some warmth.`;
+                    else if (distance <= 15) response = `${direction} and it's starting to get chilly.`;
+                    else if (distance <= 20) response = `${direction} and you are shivering... it's cold!`;
+                    else response = `${direction} and you are freezing cold, What are you doing in Arctic?`;
+
+                    response += "\n\n" + this.prompt;
+                }
+                return response;
+            }
+        }
+
+        // --- Source Codes (Simplified for Display) ---
+        const sourceCodes = {
+            alpha: `<span class="comment">// Alpha Guessing Game Logic</span>
+<span class="keyword">use</span> rand::{thread_rng, Rng};
+<span class="keyword">use</span> std::cmp::Ordering;
+
+<span class="keyword">fn</span> <span class="func">main</span>() {
+    <span class="func">println!</span>(<span class="string">"Welcome to Alphabets Guessing game!!"</span>);
+    <span class="keyword">let</span> secret = thread_rng().gen_range(<span class="string">b'A'</span>..=<span class="string">b'Z'</span>);
+    
+    <span class="keyword">loop</span> {
+        <span class="comment">// ... input handling ...</span>
+        <span class="keyword">let</span> distance = (guess - secret).abs();
+        <span class="keyword">match</span> (guess.cmp(&secret), distance) {
+            (Ordering::Equal, _) => { <span class="func">println!</span>(<span class="string">"You Win!"</span>); <span class="keyword">break</span>; },
+            (Ordering::Less, <span class="num">1</span>) => <span class="func">println!</span>(<span class="string">"BOILING RED HOT!!"</span>),
+            <span class="comment">// ... other cases ...</span>
+            _ => <span class="func">println!</span>(<span class="string">"Freezing cold..."</span>),
+        }
+    }
+}`,
+            number: `<span class="comment">// Number Guessing Game Logic</span>
+<span class="keyword">use</span> rand::{thread_rng, Rng};
+<span class="keyword">use</span> std::cmp::Ordering;
+
+<span class="keyword">fn</span> <span class="func">main</span>() {
+    <span class="func">println!</span>(<span class="string">"Guess the number (1-100)!!"</span>);
+    <span class="keyword">let</span> secret_number = thread_rng().gen_range(<span class="num">1</span>..=<span class="num">100</span>);
+
+    <span class="keyword">loop</span> {
+        <span class="comment">// ... input handling ...</span>
+        <span class="keyword">let</span> distance = (guess - secret_number).abs();
+        <span class="keyword">match</span> (guess.cmp(&secret_number), distance) {
+            (Ordering::Equal, _) => { <span class="func">println!</span>(<span class="string">"You Win!"</span>); <span class="keyword">break</span>; },
+            (Ordering::Less, <span class="num">1</span>) => <span class="func">println!</span>(<span class="string">"BOILING RED HOT!!"</span>),
+            <span class="comment">// ... other cases ...</span>
+            _ => <span class="func">println!</span>(<span class="string">"Freezing cold..."</span>),
+        }
+    }
+}`
+        };
+
+        // --- UI Controller ---
+
+        let currentGame = null;
+        let currentGameType = '';
+        const terminalOutput = document.getElementById('terminal-output');
+        const cmdInput = document.getElementById('cmd-input');
+        const sourceCodePre = document.getElementById('source-code');
+        const terminalTitle = document.getElementById('terminal-title');
+
+        function switchGame(gameType, btnElement) {
+            if (currentGameType === gameType) return;
+            currentGameType = gameType;
+
+            // Update Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) {
+                btnElement.classList.add('active');
+            } else {
+                document.querySelector(`.tab-btn[onclick*="${gameType}"]`).classList.add('active');
+            }
+
+            // Clear Terminal
+            terminalOutput.innerHTML = '';
+            cmdInput.value = '';
+
+            // Init Game
+            if (gameType === 'alpha') {
+                currentGame = new AlphaGuessGame();
+                terminalTitle.textContent = "user@rust-game:~/alpha_guess";
+                sourceCodePre.innerHTML = sourceCodes.alpha;
+            } else {
+                currentGame = new NumberGuessGame();
+                terminalTitle.textContent = "user@rust-game:~/number_guess";
+                sourceCodePre.innerHTML = sourceCodes.number;
+            }
+
+            const welcome = currentGame.getWelcomeMessage();
+            if (welcome) addToTerminal(welcome);
+            cmdInput.focus();
+        }
+
+        function addToTerminal(text, isCommand = false) {
+            if (!text) return;
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                const div = document.createElement('div');
+                // Use textContent to prevent HTML injection, but allow simplistic styling if needed later
+                div.textContent = line;
+                if (isCommand) {
+                    div.style.color = '#27c93f';
+                    div.textContent = '$ ' + line;
+                }
+                terminalOutput.appendChild(div);
+            });
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        // Input Listener
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = cmdInput.value;
+                addToTerminal(command, true);
+                if (currentGame) {
+                    const response = currentGame.processInput(command);
+                    addToTerminal(response);
+                }
+                cmdInput.value = '';
+            }
+        });
+
+        // Focus handler
+        document.querySelector('.terminal-box').addEventListener('click', () => {
+            cmdInput.focus();
+        });
+
+        // Initialize Default Game
+        window.addEventListener('DOMContentLoaded', () => {
+            switchGame('alpha', null);
+        });
+
+    </script>
+</body>
+
+</html>
