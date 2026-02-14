@@ -794,13 +794,17 @@ footer {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 80%;
+        width: 70%;
+        max-width: 280px;
         height: 100vh;
-        background: #0f172a;
+        background: var(--surface-color);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-left: 1px solid var(--surface-border);
         flex-direction: column;
         justify-content: center;
         transition: var(--transition);
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
     }
 
     .nav-links.active {
