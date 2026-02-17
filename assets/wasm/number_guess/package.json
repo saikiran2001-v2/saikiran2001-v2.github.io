@@ -1,0 +1,15 @@
+{
+  "name": "guessing_game",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "guessing_game_bg.wasm",
+    "guessing_game.js",
+    "guessing_game.d.ts"
+  ],
+  "main": "guessing_game.js",
+  "types": "guessing_game.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

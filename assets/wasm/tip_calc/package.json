@@ -1,0 +1,15 @@
+{
+  "name": "tip_calc",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "tip_calc_bg.wasm",
+    "tip_calc.js",
+    "tip_calc.d.ts"
+  ],
+  "main": "tip_calc.js",
+  "types": "tip_calc.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

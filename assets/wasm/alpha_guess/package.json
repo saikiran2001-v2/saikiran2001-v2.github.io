@@ -1,0 +1,15 @@
+{
+  "name": "alpha_guess_game",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "alpha_guess_game_bg.wasm",
+    "alpha_guess_game.js",
+    "alpha_guess_game.d.ts"
+  ],
+  "main": "alpha_guess_game.js",
+  "types": "alpha_guess_game.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

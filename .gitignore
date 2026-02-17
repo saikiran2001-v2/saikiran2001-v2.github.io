@@ -1,2 +1,10 @@
 node_modules/
 .DS_Store
+
+# Rust build artifacts
+rust_projects/**/target/
+rust_games/**/target/
+target/
+
+# Keep WASM assets for deployment
+!assets/wasm/
