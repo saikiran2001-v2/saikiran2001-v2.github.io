@@ -492,8 +492,8 @@
             lines.forEach(line => {
                 const div = document.createElement('div');
                 div.textContent = line;
+                div.style.color = isCommand ? '#27c93f' : '#d4d4d4';
                 if (isCommand) {
-                    div.style.color = '#27c93f';
                     div.textContent = '$ ' + line;
                 }
                 terminalOutput.appendChild(div);
