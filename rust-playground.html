@@ -196,7 +196,8 @@
 
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchGame('alpha')">Alpha Guess</button>
+                <button class="tab-btn active" onclick="switchGame('tipcalc')">Tip Calculator</button>
+                <button class="tab-btn" onclick="switchGame('alpha')">Alpha Guess</button>
                 <button class="tab-btn" onclick="switchGame('number')">Number Guess</button>
             </div>
 
@@ -323,6 +324,93 @@
             }
         }
 
+        class TipCalcGame {
+            constructor() {
+                this.name = "Tip Calculator";
+                this.step = 0;
+                this.totalBill = 0;
+                this.tipPercentage = 20;
+                this.numPeople = 2;
+            }
+
+            getWelcomeMessage() {
+                return `Welcome to Tip Calculator!\n\nEnter the total bill amount:`;
+            }
+
+            reset() {
+                this.step = 0;
+                this.totalBill = 0;
+                this.tipPercentage = 20;
+                this.numPeople = 2;
+                return this.getWelcomeMessage();
+            }
+
+            processInput(input) {
+                input = input.trim();
+
+                if (this.step === 0) {
+                    const bill = parseFloat(input);
+                    if (isNaN(bill) || bill <= 0) {
+                        return "Invalid amount! Enter the total bill amount:";
+                    }
+                    this.totalBill = bill;
+                    this.step = 1;
+                    return `Total bill: $${bill.toFixed(2)}\n\nEnter tip percentage (press Enter for default 20%):`;
+                }
+
+                if (this.step === 1) {
+                    if (input === '') {
+                        this.tipPercentage = 20;
+                    } else {
+                        const tip = parseFloat(input);
+                        if (isNaN(tip) || tip < 0) {
+                            return "Invalid percentage! Enter tip percentage (or press Enter for 20%):";
+                        }
+                        this.tipPercentage = tip;
+                    }
+                    this.step = 2;
+                    return `Tip: ${this.tipPercentage}%\n\nEnter number of people to split (press Enter for default 2):`;
+                }
+
+                if (this.step === 2) {
+                    if (input === '') {
+                        this.numPeople = 2;
+                    } else {
+                        const people = parseInt(input);
+                        if (isNaN(people) || people <= 0) {
+                            return "Invalid number! Enter number of people (or press Enter for 2):";
+                        }
+                        this.numPeople = people;
+                    }
+
+                    const tip = (this.totalBill * this.tipPercentage) / 100;
+                    const total = this.totalBill + tip;
+                    const perPerson = total / this.numPeople;
+                    const tipPerPerson = tip / this.numPeople;
+
+                    const result = `\n═══════════════════════════\n` +
+                        `Total Bill: $${this.totalBill.toFixed(2)}\n` +
+                        `Tip (${this.tipPercentage}%): $${tip.toFixed(2)}\n` +
+                        `Total: $${total.toFixed(2)}\n` +
+                        `\nSplit among ${this.numPeople} people:\n` +
+                        `Per Person: $${perPerson.toFixed(2)}\n` +
+                        `Tip Per Person: $${tipPerPerson.toFixed(2)}\n` +
+                        `═══════════════════════════\n\n` +
+                        `Calculate another? (yes/no)`;
+
+                    this.step = 3;
+                    return result;
+                }
+
+                if (this.step === 3) {
+                    if (input.toLowerCase().startsWith('y')) {
+                        return this.reset();
+                    }
+                    return "Thanks for using Tip Calculator! Type 'yes' to calculate again.";
+                }
+            }
+        }
+
         class NumberGuessGame {
             constructor() {
                 this.name = "Number Guessing Game";
@@ -381,6 +469,37 @@
 
         // --- Source Codes (Simplified for Display) ---
         const sourceCodes = {
+            tipcalc: `<span class="comment">// Tip Calculator Logic</span>
+<span class="keyword">use</span> std::io;
+
+<span class="keyword">fn</span> <span class="func">main</span>() {
+    <span class="keyword">let mut</span> total_bill = String::new();
+    <span class="keyword">let mut</span> tip_percentage = String::new();
+    <span class="keyword">let</span> def_tip = <span class="num">20.0</span>;
+    <span class="keyword">let mut</span> num_people = String::new();
+
+    <span class="func">println!</span>(<span class="string">"Enter the total bill amount:"</span>);
+    io::stdin().read_line(&mut total_bill).expect(<span class="string">"Failed"</span>);
+    
+    <span class="keyword">let</span> total_bill: <span class="type">f64</span> = total_bill.trim().parse()
+        .expect(<span class="string">"Failed to convert"</span>);
+
+    <span class="func">println!</span>(<span class="string">"Enter tip % (Enter for 20%):"</span>);
+    io::stdin().read_line(&mut tip_percentage).expect(<span class="string">"Failed"</span>);
+    
+    <span class="keyword">let</span> tip_percentage: <span class="type">f64</span> = {
+        <span class="keyword">let</span> t = tip_percentage.trim();
+        <span class="keyword">if</span> t.is_empty() { def_tip }
+        <span class="keyword">else</span> { t.parse().unwrap_or(def_tip) }
+    };
+
+    <span class="keyword">let</span> tip = tip_calc(total_bill, tip_percentage);
+    <span class="func">println!</span>(<span class="string">"Total tip: {}"</span>, tip);
+}
+
+<span class="keyword">fn</span> <span class="func">tip_calc</span>(x: <span class="type">f64</span>, y: <span class="type">f64</span>) -> <span class="type">f64</span> {
+    (x * y) / <span class="num">100.0</span>
+}`,
             alpha: `<span class="comment">// Alpha Guessing Game Logic</span>
 <span class="keyword">use</span> rand::{thread_rng, Rng};
 <span class="keyword">use</span> std::cmp::Ordering;
@@ -447,7 +566,11 @@
             cmdInput.value = '';
 
             // Init Game
-            if (gameType === 'alpha') {
+            if (gameType === 'tipcalc') {
+                currentGame = new TipCalcGame();
+                terminalTitle.textContent = "user@rust-game:~/tip_calc";
+                sourceCodePre.innerHTML = sourceCodes.tipcalc;
+            } else if (gameType === 'alpha') {
                 currentGame = new AlphaGuessGame();
                 terminalTitle.textContent = "user@rust-game:~/alpha_guess";
                 sourceCodePre.innerHTML = sourceCodes.alpha;
@@ -498,7 +621,7 @@
 
         // Initialize Default Game
         window.addEventListener('DOMContentLoaded', () => {
-            switchGame('alpha', null);
+            switchGame('tipcalc', null);
         });
 
     </script>
