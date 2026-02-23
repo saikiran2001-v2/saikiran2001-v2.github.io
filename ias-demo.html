@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Apprentice System | Live Demo</title>
+    <meta name="description"
+        content="Live demo of the ML-powered Intelligent Apprentice System for optimal field engineer assignment.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        /* ===== IAS Demo Page Styles ===== */
+
+        .ias-hero {
+            padding: 120px 0 40px;
+            text-align: center;
+        }
+
+        .ias-hero .section-subtitle {
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+        }
+
+        .ias-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .ias-badge i {
+            font-size: 0.75rem;
+        }
+
+        /* Layout */
+        .ias-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+            align-items: start;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .ias-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Panel */
+        .ias-form-panel {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .ias-form-panel h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ias-form-panel h3 i {
+            color: var(--accent-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--surface-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        [data-theme="light"] .form-group select,
+        [data-theme="light"] .form-group input,
+        [data-theme="light"] .form-group textarea {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="glass"] .form-group select,
+        [data-theme="glass"] .form-group input,
+        [data-theme="glass"] .form-group textarea {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #111827;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 0.5rem;
+        }
+
+        [data-theme="light"] .form-group select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        [data-theme="glass"] .form-group select option {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        [data-theme="light"] .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        }
+
+        [data-theme="glass"] .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .btn-run {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            transition: var(--transition);
+            font-family: var(--font-body);
+        }
+
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-run:active {
+            transform: translateY(0);
+        }
+
+        .btn-run.running {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-run.running i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Panel */
+        .ias-results-panel {
+            min-height: 400px;
+        }
+
+        /* Empty State */
+        .ias-empty-state {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 4rem 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ias-empty-state i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        .ias-empty-state p {
+            color: var(--text-muted);
+            max-width: 350px;
+        }
+
+        /* Result Card */
+        .ias-result {
+            animation: fadeSlideIn 0.5s ease-out;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-header .match-quality {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-header .match-quality.excellent { color: #22c55e; }
+        .result-header .match-quality.very-good { color: #3b82f6; }
+        .result-header .match-quality.good { color: #eab308; }
+        .result-header .match-quality.acceptable { color: #f97316; }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+            border: 3px solid;
+            flex-shrink: 0;
+        }
+
+        .score-circle span {
+            font-size: 0.65rem;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .score-circle.excellent { border-color: #22c55e; color: #22c55e; }
+        .score-circle.very-good { border-color: #3b82f6; color: #3b82f6; }
+        .score-circle.good { border-color: #eab308; color: #eab308; }
+        .score-circle.acceptable { border-color: #f97316; color: #f97316; }
+
+        /* Team Cards */
+        .team-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .team-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .team-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .team-card .role-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .role-badge.senior {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .role-badge.junior {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+
+        .team-card h4 {
+            font-size: 1.15rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .team-card .email {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .team-card .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.88rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .team-card .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .team-card .detail-label {
+            color: var(--text-muted);
+        }
+
+        .team-card .skill-tags-inline {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .team-card .skill-tag {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent-primary);
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Score Breakdown */
+        .score-breakdown {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-breakdown h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .score-breakdown h4 i {
+            color: var(--accent-primary);
+        }
+
+        .score-bar-row {
+            margin-bottom: 0.9rem;
+        }
+
+        .score-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .score-bar-label .score-val {
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .score-bar-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .score-bar-track,
+        [data-theme="glass"] .score-bar-track {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease-out;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        /* ML Metadata */
+        .ml-metadata {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ml-metadata h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .ml-metadata h4 i {
+            color: var(--accent-secondary);
+        }
+
+        .ml-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .ml-stat {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+        }
+
+        [data-theme="light"] .ml-stat,
+        [data-theme="glass"] .ml-stat {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .ml-stat .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.2rem;
+        }
+
+        .ml-stat .stat-value {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Reasoning */
+        .reasoning-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reasoning-card h4 {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reasoning-card h4 i {
+            color: #22c55e;
+        }
+
+        .reasoning-card p {
+            color: var(--text-muted);
+            font-size: 0.93rem;
+            line-height: 1.7;
+        }
+
+        /* Weight Table */
+        .weights-table {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .weights-table h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .weights-table h4 i {
+            color: #eab308;
+        }
+
+        .weights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .weight-item {
+            text-align: center;
+            padding: 0.6rem;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+        }
+
+        [data-theme="light"] .weight-item,
+        [data-theme="glass"] .weight-item {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .weight-item .w-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .weight-item .w-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        /* How it Works Section */
+        .how-it-works {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .how-step {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .how-step:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-5px);
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.1rem;
+        }
+
+        .how-step h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .how-step p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        /* Engineer Pool Preview */
+        .engineer-pool {
+            margin-top: 2rem;
+        }
+
+        .pool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .pool-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .pool-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .pool-card .pool-name {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .pool-card .pool-level {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .pool-card .pool-skills {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <li class="theme-select-wrapper">
+                    <select id="theme-select" class="theme-select">
+                        <option value="midnight">Midnight</option>
+                        <option value="blue">Blueish</option>
+                        <option value="glass">Glass</option>
+                        <option value="light">Light</option>
+                    </select>
+                    <i class="fas fa-palette theme-icon"></i>
+                </li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="ias-hero">
+        <div class="container">
+            <div class="ias-badge"><i class="fas fa-circle"></i> Live Demo</div>
+            <h1 class="section-title">Intelligent Apprentice <span class="accent">System</span></h1>
+            <p class="section-subtitle">
+                ML-powered field engineer assignment — create a work order below and watch the algorithm pair
+                the optimal senior-junior team in real time. Every score you see is computed live, not hardcoded.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Layout -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="ias-layout">
+
+                <!-- Left: Form -->
+                <div class="ias-form-panel">
+                    <h3><i class="fas fa-clipboard-list"></i> Create Work Order</h3>
+
+                    <div class="form-group">
+                        <label for="ias-location">Location</label>
+                        <select id="ias-location">
+                            <option value="stockholm-central">Stockholm Central (59.33°N, 18.07°E)</option>
+                            <option value="stockholm-east">Stockholm East (59.34°N, 18.08°E)</option>
+                            <option value="stockholm-south">Stockholm South (59.31°N, 18.06°E)</option>
+                            <option value="stockholm-north">Stockholm North (59.36°N, 18.05°E)</option>
+                            <option value="gothenburg">Gothenburg (57.71°N, 11.97°E)</option>
+                            <option value="malmo">Malmö (55.60°N, 13.00°E)</option>
+                            <option value="uppsala">Uppsala (59.86°N, 17.64°E)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ias-category">Required Skills</label>
+                        <select id="ias-category">
+                            <option value="Electrical">Electrical</option>
+                            <option value="Electrical,Gas">Electrical + Gas</option>
+                            <option value="Gas">Gas</option>
+                            <option value="HVAC">HVAC</option>
+                            <option value="Electrical,HVAC">Electrical + HVAC</option>
+                            <option value="Plumbing">Plumbing</option>
+                            <option value="Network">Network</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ias-complexity">Complexity</label>
+                        <select id="ias-complexity">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ias-description">Problem Description</label>
+                        <textarea id="ias-description" placeholder="e.g. Faulty wiring in residential building, gas leak in kitchen..."></textarea>
+                    </div>
+
+                    <button class="btn-run" id="ias-run-btn" onclick="runIAS()">
+                        <i class="fas fa-bolt"></i> Run ML Assignment
+                    </button>
+                </div>
+
+                <!-- Right: Results -->
+                <div class="ias-results-panel" id="ias-results">
+                    <div class="ias-empty-state">
+                        <i class="fas fa-brain"></i>
+                        <h3>Ready to Assign</h3>
+                        <p>Configure a work order on the left and hit <strong>Run ML Assignment</strong> to see the algorithm in action.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How it Works -->
+            <div class="how-it-works">
+                <div class="section-header">
+                    <h2 class="section-title">How the <span class="accent">ML</span> Works</h2>
+                    <p class="section-subtitle">The exact same algorithm that runs on AWS Lambda, ported 1:1 to JavaScript — running entirely in your browser.</p>
+                </div>
+                <div class="how-grid">
+                    <div class="how-step">
+                        <div class="step-num">1</div>
+                        <h4>Adaptive Weights</h4>
+                        <p>Supervised learning analyzes 18 historical training sessions to learn which factors correlate with success (rating ≥ 4).</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="step-num">2</div>
+                        <h4>Engineer Clustering</h4>
+                        <p>Unsupervised clustering groups engineers by skill profiles. Cross-cluster pairings get a diversity bonus for knowledge transfer.</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="step-num">3</div>
+                        <h4>6-Factor Scoring</h4>
+                        <p>Each senior-junior pair is scored across Geographic proximity, Skill match, Training fairness, History diversity, Skill balancing, and Workload.</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="step-num">4</div>
+                        <h4>Anomaly Detection</h4>
+                        <p>Statistical analysis flags assignments that deviate &gt;2σ from historical baselines — unusual distances or exceptionally high/low scores.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engineer Pool -->
+            <div class="engineer-pool">
+                <div class="section-header">
+                    <h2 class="section-title">Engineer <span class="accent">Pool</span></h2>
+                    <p class="section-subtitle">These are the 24 field engineers the ML algorithm considers when assigning teams.</p>
+                </div>
+                <div class="pool-grid" id="engineer-pool-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <a href="mailto:bjsaikiran@gmail.com" class="email-link">bjsaikiran@gmail.com</a>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Saikiran. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    // =======================================================================
+    // INTELLIGENT APPRENTICE SYSTEM — ML ENGINE (Ported 1:1 from Python)
+    // =======================================================================
+    // This is the EXACT algorithm from Intelligent_Apprentice_System.py
+    // running client-side so users can verify nothing is faked.
+    // =======================================================================
+
+    // ---- DATA (from example_input.json) ----
+
+    const ENGINEERS = [
+        {
+            title: "Erik Andersson", email: "erik.andersson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "HVAC"],
+            latitude: 59.3293, longitude: 18.0686,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 4, lastTrainingDate: "2026-01-28"
+        },
+        {
+            title: "Maria Svensson", email: "maria.svensson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "Network"],
+            latitude: 59.3340, longitude: 18.0632,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 7, lastTrainingDate: "2026-02-01"
+        },
+        {
+            title: "Lars Pettersson", email: "lars.pettersson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 4,
+            skills: ["Electrical", "Gas"],
+            latitude: 59.3500, longitude: 18.0800,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 2, lastTrainingDate: "2025-12-15"
+        },
+        {
+            title: "Anna Johansson", email: "anna.johansson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Plumbing"],
+            latitude: 59.3180, longitude: 18.0550,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 5, lastTrainingDate: "2026-01-30"
+        },
+        {
+            title: "Viktor Olsson", email: "viktor.olsson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 3,
+            skills: ["Plumbing", "HVAC"],
+            latitude: 59.3200, longitude: 18.0600,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 3, lastTrainingDate: "2026-01-20"
+        },
+        {
+            title: "Oskar Bergman", email: "oskar.bergman@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 1,
+            skills: ["Electrical"],
+            latitude: 59.3250, longitude: 18.0700,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 0, lastTrainingDate: null
+        },
+        {
+            title: "Emma Lindgren", email: "emma.lindgren@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 2,
+            skills: ["Electrical", "Gas"],
+            latitude: 59.3340, longitude: 18.0632,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 3, lastTrainingDate: "2025-12-10"
+        },
+        {
+            title: "Gustav Nilsson", email: "gustav.nilsson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 4,
+            skills: ["Electrical", "Gas", "Network"],
+            latitude: 59.3400, longitude: 18.0500,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 9, lastTrainingDate: "2026-02-02"
+        },
+        {
+            title: "Sofia Karlsson", email: "sofia.karlsson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 3,
+            skills: ["Electrical"],
+            latitude: 59.3100, longitude: 18.0900,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 5, lastTrainingDate: "2026-01-15"
+        },
+        {
+            title: "Filip Eriksson", email: "filip.eriksson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 2,
+            skills: ["Gas"],
+            latitude: 59.3450, longitude: 18.0450,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 1, lastTrainingDate: "2025-11-20"
+        },
+        {
+            title: "Julia Larsson", email: "julia.larsson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 1,
+            skills: [],
+            latitude: 59.3600, longitude: 18.1000,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 0, lastTrainingDate: null
+        },
+        {
+            title: "Ingrid Hansson", email: "ingrid.hansson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "Network", "HVAC"],
+            latitude: 59.3280, longitude: 18.0720,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 12, lastTrainingDate: "2026-02-03"
+        },
+        // ---- Gothenburg Engineers ----
+        {
+            title: "Henrik Lindqvist", email: "henrik.lindqvist@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "HVAC"],
+            latitude: 57.7089, longitude: 11.9746,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 6, lastTrainingDate: "2026-02-05"
+        },
+        {
+            title: "Karin Ström", email: "karin.strom@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 4,
+            skills: ["Electrical", "Plumbing", "Network"],
+            latitude: 57.7210, longitude: 11.9500,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 3, lastTrainingDate: "2026-01-25"
+        },
+        {
+            title: "Axel Dahl", email: "axel.dahl@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 2,
+            skills: ["Electrical", "Gas"],
+            latitude: 57.7150, longitude: 11.9800,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 2, lastTrainingDate: "2025-12-20"
+        },
+        {
+            title: "Linnea Fransson", email: "linnea.fransson@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 3,
+            skills: ["HVAC", "Plumbing"],
+            latitude: 57.6950, longitude: 11.9600,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 4, lastTrainingDate: "2026-01-18"
+        },
+        // ---- Malmö Engineers ----
+        {
+            title: "Nils Åberg", email: "nils.aberg@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "Network"],
+            latitude: 55.6050, longitude: 13.0038,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 5, lastTrainingDate: "2026-02-01"
+        },
+        {
+            title: "Elsa Björk", email: "elsa.bjork@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 4,
+            skills: ["Electrical", "HVAC", "Plumbing"],
+            latitude: 55.5900, longitude: 12.9900,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 4, lastTrainingDate: "2026-01-20"
+        },
+        {
+            title: "Oscar Lund", email: "oscar.lund@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 1,
+            skills: ["Electrical"],
+            latitude: 55.6100, longitude: 13.0100,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 1, lastTrainingDate: "2025-11-30"
+        },
+        {
+            title: "Maja Sandberg", email: "maja.sandberg@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 3,
+            skills: ["Gas", "Network"],
+            latitude: 55.6150, longitude: 12.9950,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 3, lastTrainingDate: "2026-01-12"
+        },
+        // ---- Uppsala Engineers ----
+        {
+            title: "Per Magnusson", email: "per.magnusson@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 5,
+            skills: ["Electrical", "Gas", "HVAC", "Plumbing"],
+            latitude: 59.8586, longitude: 17.6389,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 7, lastTrainingDate: "2026-02-08"
+        },
+        {
+            title: "Astrid Ekman", email: "astrid.ekman@alliander.nl",
+            engineerLevel: "Senior", skillLevel: 4,
+            skills: ["Network", "Electrical"],
+            latitude: 59.8500, longitude: 17.6500,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 2, lastTrainingDate: "2025-12-28"
+        },
+        {
+            title: "Lukas Holmberg", email: "lukas.holmberg@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 2,
+            skills: ["Electrical", "HVAC"],
+            latitude: 59.8650, longitude: 17.6200,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 1, lastTrainingDate: "2026-01-05"
+        },
+        {
+            title: "Wilma Sjögren", email: "wilma.sjogren@alliander.nl",
+            engineerLevel: "Junior", skillLevel: 3,
+            skills: ["Gas", "Plumbing"],
+            latitude: 59.8400, longitude: 17.6600,
+            availabilityStatus: "Available",
+            trainingAssignmentCount: 5, lastTrainingDate: "2026-01-30"
+        }
+    ];
+
+    const TRAINING_HISTORY = [
+        { seniorEngineer: "erik.andersson@alliander.nl", juniorEngineer: "emma.lindgren@alliander.nl", seniorRating: "5", trainingDate: "2025-12-10", distanceKm: 4.2, matchScore: 92, skillMatch: true, juniorPreviousTrainingCount: 2, previousPairings: 2, juniorSkillLevel: 2 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "gustav.nilsson@alliander.nl", seniorRating: "4", trainingDate: "2026-02-02", distanceKm: 6.8, matchScore: 88, skillMatch: true, juniorPreviousTrainingCount: 8, previousPairings: 3, juniorSkillLevel: 4 },
+        { seniorEngineer: "lars.pettersson@alliander.nl", juniorEngineer: "sofia.karlsson@alliander.nl", seniorRating: "3", trainingDate: "2026-01-15", distanceKm: 12.5, matchScore: 68, skillMatch: true, juniorPreviousTrainingCount: 4, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "anna.johansson@alliander.nl", juniorEngineer: "emma.lindgren@alliander.nl", seniorRating: "4", trainingDate: "2025-11-05", distanceKm: 8.1, matchScore: 75, skillMatch: false, juniorPreviousTrainingCount: 1, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "erik.andersson@alliander.nl", juniorEngineer: "gustav.nilsson@alliander.nl", seniorRating: "5", trainingDate: "2026-01-18", distanceKm: 5.5, matchScore: 95, skillMatch: true, juniorPreviousTrainingCount: 6, previousPairings: 2, juniorSkillLevel: 4 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "sofia.karlsson@alliander.nl", seniorRating: "4", trainingDate: "2025-10-22", distanceKm: 15.2, matchScore: 70, skillMatch: true, juniorPreviousTrainingCount: 2, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "lars.pettersson@alliander.nl", juniorEngineer: "filip.eriksson@alliander.nl", seniorRating: "2", trainingDate: "2025-11-20", distanceKm: 18.5, matchScore: 55, skillMatch: false, juniorPreviousTrainingCount: 0, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "anna.johansson@alliander.nl", juniorEngineer: "gustav.nilsson@alliander.nl", seniorRating: "3", trainingDate: "2025-12-08", distanceKm: 9.3, matchScore: 72, skillMatch: false, juniorPreviousTrainingCount: 5, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "erik.andersson@alliander.nl", juniorEngineer: "emma.lindgren@alliander.nl", seniorRating: "5", trainingDate: "2025-09-15", distanceKm: 4.2, matchScore: 90, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 1, juniorSkillLevel: 1 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "ingrid.hansson@alliander.nl", seniorRating: "5", trainingDate: "2026-02-03", distanceKm: 3.8, matchScore: 98, skillMatch: true, juniorPreviousTrainingCount: 11, previousPairings: 4, juniorSkillLevel: 5 },
+        { seniorEngineer: "lars.pettersson@alliander.nl", juniorEngineer: "emma.lindgren@alliander.nl", seniorRating: "4", trainingDate: "2025-08-20", distanceKm: 11.2, matchScore: 78, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 0, juniorSkillLevel: 1 },
+        { seniorEngineer: "anna.johansson@alliander.nl", juniorEngineer: "sofia.karlsson@alliander.nl", seniorRating: "5", trainingDate: "2026-01-30", distanceKm: 14.5, matchScore: 82, skillMatch: false, juniorPreviousTrainingCount: 4, previousPairings: 2, juniorSkillLevel: 3 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "gustav.nilsson@alliander.nl", seniorRating: "4", trainingDate: "2026-01-05", distanceKm: 6.8, matchScore: 87, skillMatch: true, juniorPreviousTrainingCount: 7, previousPairings: 2, juniorSkillLevel: 4 },
+        { seniorEngineer: "erik.andersson@alliander.nl", juniorEngineer: "sofia.karlsson@alliander.nl", seniorRating: "4", trainingDate: "2025-11-28", distanceKm: 16.8, matchScore: 73, skillMatch: true, juniorPreviousTrainingCount: 3, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "lars.pettersson@alliander.nl", juniorEngineer: "gustav.nilsson@alliander.nl", seniorRating: "3", trainingDate: "2025-12-15", distanceKm: 13.5, matchScore: 69, skillMatch: true, juniorPreviousTrainingCount: 6, previousPairings: 1, juniorSkillLevel: 4 },
+        { seniorEngineer: "anna.johansson@alliander.nl", juniorEngineer: "ingrid.hansson@alliander.nl", seniorRating: "5", trainingDate: "2026-01-22", distanceKm: 7.2, matchScore: 91, skillMatch: false, juniorPreviousTrainingCount: 10, previousPairings: 2, juniorSkillLevel: 5 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "emma.lindgren@alliander.nl", seniorRating: "5", trainingDate: "2026-02-01", distanceKm: 4.5, matchScore: 93, skillMatch: true, juniorPreviousTrainingCount: 2, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "erik.andersson@alliander.nl", juniorEngineer: "ingrid.hansson@alliander.nl", seniorRating: "5", trainingDate: "2026-01-28", distanceKm: 3.5, matchScore: 96, skillMatch: true, juniorPreviousTrainingCount: 11, previousPairings: 2, juniorSkillLevel: 5 },
+        { seniorEngineer: "lars.pettersson@alliander.nl", juniorEngineer: "sofia.karlsson@alliander.nl", seniorRating: "2", trainingDate: "2025-09-10", distanceKm: 19.2, matchScore: 58, skillMatch: true, juniorPreviousTrainingCount: 1, previousPairings: 0, juniorSkillLevel: 2 },
+        { seniorEngineer: "maria.svensson@alliander.nl", juniorEngineer: "ingrid.hansson@alliander.nl", seniorRating: "5", trainingDate: "2025-12-20", distanceKm: 3.8, matchScore: 94, skillMatch: true, juniorPreviousTrainingCount: 9, previousPairings: 3, juniorSkillLevel: 5 },
+        // Gothenburg training history
+        { seniorEngineer: "henrik.lindqvist@alliander.nl", juniorEngineer: "axel.dahl@alliander.nl", seniorRating: "5", trainingDate: "2025-12-20", distanceKm: 2.1, matchScore: 91, skillMatch: true, juniorPreviousTrainingCount: 1, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "karin.strom@alliander.nl", juniorEngineer: "linnea.fransson@alliander.nl", seniorRating: "4", trainingDate: "2026-01-18", distanceKm: 3.5, matchScore: 79, skillMatch: true, juniorPreviousTrainingCount: 3, previousPairings: 2, juniorSkillLevel: 3 },
+        { seniorEngineer: "henrik.lindqvist@alliander.nl", juniorEngineer: "linnea.fransson@alliander.nl", seniorRating: "4", trainingDate: "2026-02-05", distanceKm: 1.8, matchScore: 85, skillMatch: true, juniorPreviousTrainingCount: 4, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "karin.strom@alliander.nl", juniorEngineer: "axel.dahl@alliander.nl", seniorRating: "5", trainingDate: "2025-11-15", distanceKm: 2.9, matchScore: 88, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 0, juniorSkillLevel: 1 },
+        // Malmö training history
+        { seniorEngineer: "nils.aberg@alliander.nl", juniorEngineer: "oscar.lund@alliander.nl", seniorRating: "4", trainingDate: "2025-11-30", distanceKm: 1.5, matchScore: 82, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 1, juniorSkillLevel: 1 },
+        { seniorEngineer: "elsa.bjork@alliander.nl", juniorEngineer: "maja.sandberg@alliander.nl", seniorRating: "5", trainingDate: "2026-01-12", distanceKm: 2.8, matchScore: 90, skillMatch: false, juniorPreviousTrainingCount: 2, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "nils.aberg@alliander.nl", juniorEngineer: "maja.sandberg@alliander.nl", seniorRating: "4", trainingDate: "2026-02-01", distanceKm: 1.2, matchScore: 86, skillMatch: true, juniorPreviousTrainingCount: 3, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "elsa.bjork@alliander.nl", juniorEngineer: "oscar.lund@alliander.nl", seniorRating: "3", trainingDate: "2025-10-20", distanceKm: 3.0, matchScore: 65, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 0, juniorSkillLevel: 1 },
+        // Uppsala training history
+        { seniorEngineer: "per.magnusson@alliander.nl", juniorEngineer: "lukas.holmberg@alliander.nl", seniorRating: "5", trainingDate: "2026-01-05", distanceKm: 1.7, matchScore: 93, skillMatch: true, juniorPreviousTrainingCount: 0, previousPairings: 1, juniorSkillLevel: 2 },
+        { seniorEngineer: "astrid.ekman@alliander.nl", juniorEngineer: "wilma.sjogren@alliander.nl", seniorRating: "4", trainingDate: "2026-01-30", distanceKm: 2.3, matchScore: 76, skillMatch: false, juniorPreviousTrainingCount: 4, previousPairings: 2, juniorSkillLevel: 3 },
+        { seniorEngineer: "per.magnusson@alliander.nl", juniorEngineer: "wilma.sjogren@alliander.nl", seniorRating: "5", trainingDate: "2026-02-08", distanceKm: 2.0, matchScore: 89, skillMatch: true, juniorPreviousTrainingCount: 5, previousPairings: 1, juniorSkillLevel: 3 },
+        { seniorEngineer: "astrid.ekman@alliander.nl", juniorEngineer: "lukas.holmberg@alliander.nl", seniorRating: "4", trainingDate: "2025-12-28", distanceKm: 2.5, matchScore: 81, skillMatch: true, juniorPreviousTrainingCount: 1, previousPairings: 0, juniorSkillLevel: 2 }
+    ];
+
+    const LOCATIONS = {
+        "stockholm-central": { name: "Stockholm Central District", lat: 59.3293, lon: 18.0686 },
+        "stockholm-east":    { name: "Stockholm East",             lat: 59.3400, lon: 18.0800 },
+        "stockholm-south":   { name: "Stockholm South",            lat: 59.3100, lon: 18.0600 },
+        "stockholm-north":   { name: "Stockholm North",            lat: 59.3600, lon: 18.0500 },
+        "gothenburg":        { name: "Gothenburg",                 lat: 57.7089, lon: 11.9746 },
+        "malmo":             { name: "Malmö",                      lat: 55.6050, lon: 13.0038 },
+        "uppsala":           { name: "Uppsala",                    lat: 59.8586, lon: 17.6389 }
+    };
+
+    // ---- UTILITY FUNCTIONS (Direct port from Python) ----
+
+    function haversine(lat1, lon1, lat2, lon2) {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.asin(Math.sqrt(a));
+        return R * c;
+    }
+
+    function parseRating(rating) {
+        if (rating === null || rating === undefined) return 3;
+        const r = parseInt(rating);
+        return isNaN(r) ? 3 : r;
+    }
+
+    function calculateDaysSince(dateStr) {
+        if (!dateStr) return 999;
+        try {
+            const lastDate = new Date(dateStr);
+            const now = new Date();
+            return Math.max(0, Math.floor((now - lastDate) / (1000 * 60 * 60 * 24)));
+        } catch {
+            return 999;
+        }
+    }
+
+    function calculateConfidence(score) {
+        if (score >= 85) return "Very High (95%+)";
+        if (score >= 70) return "High (85-95%)";
+        if (score >= 55) return "Moderate (70-85%)";
+        return "Low (<70%)";
+    }
+
+    // ---- ML ENHANCEMENT 1: ADAPTIVE WEIGHT OPTIMIZATION ----
+    // Supervised Learning — learns from labeled data (ratings)
+
+    function optimizeWeightsML(trainingHistory) {
+        const defaultWeights = {
+            geographic: 0.25,
+            skill_match: 0.25,
+            training_fairness: 0.20,
+            history_diversity: 0.15,
+            skill_balancing: 0.10,
+            workload: 0.05
+        };
+
+        if (trainingHistory.length < 10) return defaultWeights;
+
+        const successful = trainingHistory.filter(h => parseRating(h.seniorRating) >= 4);
+        const unsuccessful = trainingHistory.filter(h => parseRating(h.seniorRating) < 4);
+
+        if (successful.length < 5) return defaultWeights;
+
+        const factorScores = {
+            geographic: 0, skill_match: 0, training_fairness: 0,
+            history_diversity: 0, skill_balancing: 0, workload: 0
+        };
+
+        for (const session of successful) {
+            const rating = parseRating(session.seniorRating);
+            const weight = rating / 5.0;
+
+            const distance = session.distanceKm || 50;
+            if (distance < 15) factorScores.geographic += weight * 1.0;
+            else if (distance < 30) factorScores.geographic += weight * 0.7;
+            else factorScores.geographic += weight * 0.3;
+
+            if (session.skillMatch) factorScores.skill_match += weight * 1.0;
+            else factorScores.skill_match += weight * 0.5;
+
+            const juniorPrevCount = session.juniorPreviousTrainingCount || 5;
+            if (juniorPrevCount <= 3) factorScores.training_fairness += weight * 1.0;
+            else if (juniorPrevCount <= 6) factorScores.training_fairness += weight * 0.7;
+            else factorScores.training_fairness += weight * 0.4;
+
+            const pairHistory = session.previousPairings || 0;
+            if (pairHistory === 0) factorScores.history_diversity += weight * 1.0;
+            else if (pairHistory <= 2) factorScores.history_diversity += weight * 0.6;
+            else factorScores.history_diversity += weight * 0.2;
+
+            const juniorLevel = session.juniorSkillLevel || 3;
+            if (juniorLevel <= 2) factorScores.skill_balancing += weight * 1.0;
+            else factorScores.skill_balancing += weight * 0.5;
+
+            factorScores.workload += weight * 0.5;
+        }
+
+        for (const session of unsuccessful) {
+            const rating = parseRating(session.seniorRating);
+            const penalty = (3 - rating) / 3.0;
+            const distance = session.distanceKm || 50;
+            if (distance > 40) factorScores.geographic -= penalty * 0.3;
+            const pairHistory = session.previousPairings || 0;
+            if (pairHistory > 3) factorScores.history_diversity -= penalty * 0.5;
+        }
+
+        const totalScore = Object.values(factorScores).reduce((s, v) => s + Math.max(0, v), 0);
+
+        if (totalScore > 0) {
+            const mlWeights = {};
+            for (const k of Object.keys(factorScores)) {
+                mlWeights[k] = Math.max(0, factorScores[k]) / totalScore;
+            }
+            const alpha = 0.7;
+            const blended = {};
+            for (const k of Object.keys(defaultWeights)) {
+                blended[k] = alpha * mlWeights[k] + (1 - alpha) * defaultWeights[k];
+            }
+            return blended;
+        }
+        return defaultWeights;
+    }
+
+    // ---- ML ENHANCEMENT 2: UNSUPERVISED CLUSTERING ----
+
+    function clusterEngineerProfiles(engineers) {
+        const clusters = {};
+        for (const eng of engineers) {
+            const skills = (eng.skills || []).slice().sort();
+            const level = eng.skillLevel || 3;
+            const experience = eng.engineerLevel || "Junior";
+            const clusterKey = `${skills.length ? skills.join("-") : "general"}|${experience}|L${level}`;
+            if (!clusters[clusterKey]) {
+                clusters[clusterKey] = { members: [], avg_skill_level: 0, skill_set: skills, size: 0 };
+            }
+            clusters[clusterKey].members.push(eng);
+            clusters[clusterKey].size += 1;
+        }
+        for (const cid of Object.keys(clusters)) {
+            const members = clusters[cid].members;
+            if (members.length) {
+                clusters[cid].avg_skill_level = members.reduce((s, m) => s + (m.skillLevel || 3), 0) / members.length;
+            }
+        }
+        return clusters;
+    }
+
+    function getEngineerClusterId(engineer) {
+        const skills = (engineer.skills || []).slice().sort();
+        const level = engineer.skillLevel || 3;
+        const experience = engineer.engineerLevel || "Junior";
+        return `${skills.length ? skills.join("-") : "general"}|${experience}|L${level}`;
+    }
+
+    function getClusterDiversityBonus(seniorCluster, juniorCluster) {
+        return seniorCluster !== juniorCluster ? 1.15 : 1.0;
+    }
+
+    // ---- ML ENHANCEMENT 3: ANOMALY DETECTION ----
+
+    function detectAssignmentAnomalies(trainingHistory, proposedPair) {
+        const anomalies = [];
+        if (trainingHistory.length < 20) return anomalies;
+
+        const distances = trainingHistory.filter(h => h.distanceKm).map(h => h.distanceKm);
+        const scores = trainingHistory.filter(h => h.matchScore).map(h => h.matchScore);
+        if (!distances.length || !scores.length) return anomalies;
+
+        const avgDist = distances.reduce((a, b) => a + b, 0) / distances.length;
+        const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+        const distStd = Math.sqrt(distances.reduce((s, d) => s + (d - avgDist) ** 2, 0) / distances.length);
+        const scoreStd = Math.sqrt(scores.reduce((s, d) => s + (d - avgScore) ** 2, 0) / scores.length);
+
+        const propDist = (proposedPair.scoreBreakdown || {}).distance_km || 0;
+        const propScore = proposedPair.score || 0;
+
+        if (Math.abs(propDist - avgDist) > 2 * distStd) {
+            anomalies.push(
+                `⚠️ Unusual travel distance: ${propDist.toFixed(1)}km (typical: ${avgDist.toFixed(1)}±${distStd.toFixed(1)}km). Review recommended.`
+            );
+        }
+        if (Math.abs(propScore - avgScore) > 2 * scoreStd) {
+            if (propScore > avgScore) {
+                anomalies.push(`✓ Exceptionally high match score: ${propScore.toFixed(1)} (typical: ${avgScore.toFixed(1)}±${scoreStd.toFixed(1)}). Excellent pairing!`);
+            } else {
+                anomalies.push(`⚠️ Below-average match score: ${propScore.toFixed(1)} (typical: ${avgScore.toFixed(1)}±${scoreStd.toFixed(1)}). Consider alternatives.`);
+            }
+        }
+
+        const seniorId = (proposedPair.senior || {}).email || '';
+        const juniorId = (proposedPair.junior || {}).email || '';
+        const pairHist = trainingHistory.filter(h => h.seniorEngineer === seniorId && h.juniorEngineer === juniorId);
+        if (pairHist.length >= 3) {
+            const recentRatings = pairHist.slice(-3).map(h => parseRating(h.seniorRating));
+            const avgPast = recentRatings.reduce((a, b) => a + b, 0) / recentRatings.length;
+            if (avgPast < 3.5) {
+                anomalies.push(`⚠️ This pair has ${pairHist.length} previous sessions with average rating ${avgPast.toFixed(1)}/5. Consider different pairing.`);
+            }
+        }
+        return anomalies;
+    }
+
+    // ---- CORE: FILTER ENGINEERS ----
+
+    function filterEngineers(engineers, level, requiredSkills, allowLearning = false) {
+        const filtered = [];
+        const reqSet = new Set(requiredSkills);
+
+        for (const eng of engineers) {
+            if (eng.engineerLevel !== level) continue;
+            if (eng.availabilityStatus !== 'Available') continue;
+            const engSkills = new Set(eng.skills || []);
+
+            if (level === 'Senior') {
+                let hasAll = true;
+                for (const s of reqSet) { if (!engSkills.has(s)) { hasAll = false; break; } }
+                if (!hasAll) continue;
+            } else if (allowLearning) {
+                if (reqSet.size > 0 && engSkills.size > 0) {
+                    let hasAny = false;
+                    for (const s of reqSet) { if (engSkills.has(s)) { hasAny = true; break; } }
+                    if (!hasAny) continue;
+                }
+            }
+            filtered.push(eng);
+        }
+        return filtered;
+    }
+
+    // ---- CORE: 6-FACTOR SCORING (ML-enhanced) ----
+
+    function calculateComprehensiveScoreML(senior, junior, workLoc, requiredSkills,
+                                           complexity, trainingHistory, avgJuniorSkill,
+                                           avgJuniorTraining, mlWeights, clusters) {
+        const scores = {};
+
+        const WEIGHTS = {
+            geographic:        (mlWeights.geographic || 0.25) * 100,
+            skill_match:       (mlWeights.skill_match || 0.25) * 100,
+            training_fairness: (mlWeights.training_fairness || 0.20) * 100,
+            history_diversity: (mlWeights.history_diversity || 0.15) * 100,
+            skill_balancing:   (mlWeights.skill_balancing || 0.10) * 100,
+            workload:          (mlWeights.workload || 0.05) * 100
+        };
+
+        // 1. GEOGRAPHIC PROXIMITY
+        const seniorDist = haversine(workLoc.lat, workLoc.lon, senior.latitude || 0, senior.longitude || 0);
+        const juniorDist = haversine(workLoc.lat, workLoc.lon, junior.latitude || 0, junior.longitude || 0);
+        const avgDistance = (seniorDist + juniorDist) / 2;
+
+        let geoScore;
+        if (avgDistance <= 5)       geoScore = 1.0;
+        else if (avgDistance <= 15)  geoScore = 0.88;
+        else if (avgDistance <= 30)  geoScore = 0.72;
+        else if (avgDistance <= 50)  geoScore = 0.48;
+        else                         geoScore = Math.max(0, 1 - (avgDistance - 50) / 100);
+
+        scores.geographic = Math.round(geoScore * WEIGHTS.geographic * 100) / 100;
+        scores.distance_km = Math.round(avgDistance * 10) / 10;
+
+        // 2. SKILL MATCHING
+        const seniorSkills = new Set(senior.skills || []);
+        const juniorSkills = new Set(junior.skills || []);
+        const required = new Set(requiredSkills);
+
+        let seniorHasAll = true;
+        for (const s of required) { if (!seniorSkills.has(s)) { seniorHasAll = false; break; } }
+        const seniorLevel = senior.skillLevel || 3;
+        const seniorScore = (seniorHasAll && seniorLevel >= 4) ? 0.6 : seniorHasAll ? 0.4 : 0.2;
+
+        let juniorOverlap = 0;
+        for (const s of required) { if (juniorSkills.has(s)) juniorOverlap++; }
+        const juniorTotal = required.size;
+        const juniorScore = juniorTotal > 0 ? (juniorOverlap / juniorTotal * 0.4) : 0.2;
+
+        scores.skill_match = Math.round((seniorScore + juniorScore) * WEIGHTS.skill_match * 100) / 100;
+        scores.senior_expertise = seniorLevel;
+        scores.junior_skill_overlap = `${juniorOverlap}/${juniorTotal}`;
+
+        // 3. TRAINING DISTRIBUTION FAIRNESS
+        const juniorCount = junior.trainingAssignmentCount || 0;
+        const lastTraining = junior.lastTrainingDate;
+
+        let fairnessBase;
+        if (juniorCount <= avgJuniorTraining)          fairnessBase = 0.75;
+        else if (juniorCount <= avgJuniorTraining + 2)  fairnessBase = 0.50;
+        else                                            fairnessBase = 0.25;
+
+        const daysSince = calculateDaysSince(lastTraining);
+        let timeBonus = 0;
+        if (daysSince > 30) timeBonus = 0.25;
+        else if (daysSince > 14) timeBonus = 0.15;
+        else if (daysSince > 7) timeBonus = 0.05;
+
+        scores.training_fairness = Math.round((fairnessBase + timeBonus) * WEIGHTS.training_fairness * 100) / 100;
+        scores.junior_training_count = juniorCount;
+        scores.days_since_training = daysSince;
+
+        // 4. TRAINING HISTORY ANALYSIS
+        const seniorId = senior.email || senior.title || '';
+        const juniorId = junior.email || junior.title || '';
+
+        const pairHistory = trainingHistory.filter(
+            h => h.seniorEngineer === seniorId && h.juniorEngineer === juniorId
+        );
+        const pairCount = pairHistory.length;
+
+        let historyScore;
+        if (pairCount === 0)      historyScore = 1.0;
+        else if (pairCount === 1) historyScore = 0.8;
+        else if (pairCount === 2) historyScore = 0.53;
+        else                      historyScore = 0.2;
+
+        if (pairHistory.length) {
+            const recentRatings = pairHistory.slice(-3).map(h => parseRating(h.seniorRating));
+            const avgRating = recentRatings.reduce((a, b) => a + b, 0) / recentRatings.length;
+            if (avgRating >= 4) historyScore += 0.13;
+        }
+
+        scores.history_diversity = Math.round(historyScore * WEIGHTS.history_diversity * 100) / 100;
+        scores.previous_pairings = pairCount;
+
+        // 5. SKILL LEVEL BALANCING
+        const juniorSkill = junior.skillLevel || 1;
+
+        let balanceScore = juniorSkill < avgJuniorSkill ? 1.0 : juniorSkill === avgJuniorSkill ? 0.6 : 0.3;
+        const skillGap = (senior.skillLevel || 5) - juniorSkill;
+        if (skillGap >= 2 && skillGap <= 3) balanceScore += 0.2;
+
+        scores.skill_balancing = Math.round(balanceScore * WEIGHTS.skill_balancing * 100) / 100;
+        scores.junior_skill_level = juniorSkill;
+        scores.skill_gap = skillGap;
+
+        // 6. WORKLOAD BALANCE
+        const seniorLoad = senior.trainingAssignmentCount || 0;
+        const juniorLoad = junior.trainingAssignmentCount || 0;
+
+        let workloadScore;
+        if (seniorLoad <= 3 && juniorLoad <= 3)      workloadScore = 1.0;
+        else if (seniorLoad <= 5 && juniorLoad <= 5) workloadScore = 0.6;
+        else                                          workloadScore = 0.2;
+
+        scores.workload_balance = Math.round(workloadScore * WEIGHTS.workload * 100) / 100;
+
+        // ML: Cluster diversity bonus
+        const seniorCluster = getEngineerClusterId(senior);
+        const juniorCluster = getEngineerClusterId(junior);
+        const diversityMultiplier = getClusterDiversityBonus(seniorCluster, juniorCluster);
+
+        const baseTotal = scores.geographic + scores.skill_match + scores.training_fairness +
+                          scores.history_diversity + scores.skill_balancing + scores.workload_balance;
+
+        scores.total = baseTotal * diversityMultiplier;
+        scores.ml_cluster_bonus = diversityMultiplier > 1 ? `${((diversityMultiplier - 1) * 100).toFixed(0)}%` : "0%";
+
+        return scores;
+    }
+
+    // ---- CORE: GENERATE REASONING ----
+
+    function generateReasoning(senior, junior, scores, complexity) {
+        const total = scores.total;
+        let quality;
+        if (total >= 85)      quality = "Excellent";
+        else if (total >= 70) quality = "Very Good";
+        else if (total >= 55) quality = "Good";
+        else                  quality = "Acceptable";
+
+        const highlights = [];
+
+        if (scores.geographic >= (scores.distance_km || 100) * 0.5)
+            highlights.push(`optimal proximity (${scores.distance_km}km)`);
+        if (scores.skill_match >= 20)
+            highlights.push(`strong skill match (senior level ${scores.senior_expertise})`);
+        if (scores.training_fairness >= 15) {
+            if (scores.days_since_training > 30) highlights.push(`junior priority (${scores.days_since_training} days overdue)`);
+            else highlights.push("fair distribution");
+        }
+        if (scores.history_diversity >= 12) {
+            if (scores.previous_pairings === 0) highlights.push("fresh pairing for diverse learning");
+            else highlights.push(`proven success (${scores.previous_pairings} prior sessions)`);
+        }
+        if (scores.skill_balancing >= 8)
+            highlights.push(`optimal teaching gap (${scores.skill_gap} levels)`);
+        if (scores.ml_cluster_bonus !== '0%')
+            highlights.push(`cross-specialization bonus (+${scores.ml_cluster_bonus})`);
+
+        const summary = `${quality} match (Score: ${Math.round(total * 10) / 10}/100). ` +
+            `${junior.title} (Level ${scores.junior_skill_level}) will learn from ` +
+            `${senior.title} (Level ${scores.senior_expertise}) for this ${complexity} complexity work. ` +
+            `Key factors: ${highlights.join(', ')}.`;
+
+        return {
+            seniorName: senior.title, seniorEmail: senior.email,
+            juniorName: junior.title, juniorEmail: junior.email,
+            matchQuality: quality, summary,
+            breakdown: {
+                geographic: `${scores.geographic.toFixed(1)} pts (${scores.distance_km}km avg)`,
+                skills: `${scores.skill_match.toFixed(1)} pts`,
+                fairness: `${scores.training_fairness.toFixed(1)} pts`,
+                history: `${scores.history_diversity.toFixed(1)} pts (${scores.previous_pairings} prior)`,
+                balance: `${scores.skill_balancing.toFixed(1)} pts`,
+                workload: `${scores.workload_balance.toFixed(1)} pts`,
+                ml_bonus: scores.ml_cluster_bonus
+            }
+        };
+    }
+
+    // ---- CORE: FIND OPTIMAL PAIR ----
+
+    function findOptimalPair(seniors, juniors, workLoc, requiredSkills,
+                             complexity, trainingHistory, mlWeights, clusters) {
+        let bestScore = -1;
+        let bestPair = null;
+
+        const avgJuniorSkill = juniors.reduce((s, j) => s + (j.skillLevel || 1), 0) / juniors.length;
+        const avgJuniorTraining = juniors.reduce((s, j) => s + (j.trainingAssignmentCount || 0), 0) / juniors.length;
+
+        for (const senior of seniors) {
+            for (const junior of juniors) {
+                const scoreDetails = calculateComprehensiveScoreML(
+                    senior, junior, workLoc, requiredSkills,
+                    complexity, trainingHistory,
+                    avgJuniorSkill, avgJuniorTraining,
+                    mlWeights, clusters
+                );
+                if (scoreDetails.total > bestScore) {
+                    bestScore = scoreDetails.total;
+                    bestPair = {
+                        senior, junior,
+                        score: Math.round(scoreDetails.total * 100) / 100,
+                        scoreBreakdown: scoreDetails,
+                        reasoning: generateReasoning(senior, junior, scoreDetails, complexity)
+                    };
+                }
+            }
+        }
+        return bestPair;
+    }
+
+    // ---- MAIN ENTRY POINT ----
+
+    function runIAS() {
+        const btn = document.getElementById('ias-run-btn');
+        btn.classList.add('running');
+        btn.innerHTML = '<i class="fas fa-spinner"></i> Computing...';
+
+        // Simulate brief processing delay so the user sees computation
+        setTimeout(() => {
+            try {
+                const locKey = document.getElementById('ias-location').value;
+                const skillsStr = document.getElementById('ias-category').value;
+                const complexity = document.getElementById('ias-complexity').value;
+                const description = document.getElementById('ias-description').value;
+
+                const loc = LOCATIONS[locKey];
+                const requiredSkills = skillsStr.split(',');
+
+                // ML Step 1: Optimize weights from training history
+                const mlWeights = optimizeWeightsML(TRAINING_HISTORY);
+
+                // ML Step 2: Cluster engineers
+                const clusters = clusterEngineerProfiles(ENGINEERS);
+
+                // Filter engineers
+                const seniors = filterEngineers(ENGINEERS, 'Senior', requiredSkills);
+                const juniors = filterEngineers(ENGINEERS, 'Junior', requiredSkills, true);
+
+                if (!seniors.length || !juniors.length) {
+                    renderNoMatch(requiredSkills, seniors.length, juniors.length);
+                    btn.classList.remove('running');
+                    btn.innerHTML = '<i class="fas fa-bolt"></i> Run ML Assignment';
+                    return;
+                }
+
+                const workLoc = { lat: loc.lat, lon: loc.lon };
+                const result = findOptimalPair(seniors, juniors, workLoc, requiredSkills,
+                                              complexity, TRAINING_HISTORY, mlWeights, clusters);
+
+                if (!result) {
+                    renderNoMatch(requiredSkills, seniors.length, juniors.length);
+                } else {
+                    // Anomaly detection
+                    result.ml_alerts = detectAssignmentAnomalies(TRAINING_HISTORY, result);
+                    result.ml_metadata = {
+                        model_version: '2.1_scheduling_enhanced',
+                        weights_source: TRAINING_HISTORY.length >= 10 ? 'ml_optimized' : 'default_expert',
+                        training_samples: TRAINING_HISTORY.length,
+                        feature_importance: mlWeights,
+                        engineer_clusters_identified: Object.keys(clusters).length,
+                        prediction_confidence: calculateConfidence(result.score)
+                    };
+
+                    renderResult(result, loc, requiredSkills, complexity, description, mlWeights,
+                                seniors.length, juniors.length);
+                }
+            } catch (err) {
+                document.getElementById('ias-results').innerHTML =
+                    `<div class="ias-empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error</h3><p>${err.message}</p></div>`;
+            }
+            btn.classList.remove('running');
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Run ML Assignment';
+        }, 600);
+    }
+
+    // ---- RENDER FUNCTIONS ----
+
+    function renderNoMatch(skills, sCount, jCount) {
+        document.getElementById('ias-results').innerHTML = `
+            <div class="ias-empty-state">
+                <i class="fas fa-user-slash"></i>
+                <h3>No Suitable Teams Found</h3>
+                <p>No engineers matched for skills: <strong>${skills.join(', ')}</strong>.<br>
+                Seniors found: ${sCount} | Juniors found: ${jCount}</p>
+            </div>`;
+    }
+
+    function qualityClass(q) {
+        return q.toLowerCase().replace(' ', '-');
+    }
+
+    function renderResult(result, loc, skills, complexity, description, mlWeights,
+                          seniorCount, juniorCount) {
+        const s = result.scoreBreakdown;
+        const q = result.reasoning.matchQuality;
+        const qc = qualityClass(q);
+        const meta = result.ml_metadata;
+
+        // Max possible per factor for bar widths
+        const maxGeo = (mlWeights.geographic || 0.25) * 100;
+        const maxSkill = (mlWeights.skill_match || 0.25) * 100;
+        const maxFair = (mlWeights.training_fairness || 0.20) * 100;
+        const maxHist = (mlWeights.history_diversity || 0.15) * 100;
+        const maxBal = (mlWeights.skill_balancing || 0.10) * 100;
+        const maxWork = (mlWeights.workload || 0.05) * 100;
+
+        let alertsHTML = '';
+        if (result.ml_alerts && result.ml_alerts.length) {
+            alertsHTML = `<div class="reasoning-card">
+                <h4><i class="fas fa-bell"></i> ML Alerts</h4>
+                ${result.ml_alerts.map(a => `<p>${a}</p>`).join('')}
+            </div>`;
+        }
+
+        const html = `
+        <div class="ias-result">
+            <!-- Header -->
+            <div class="result-header">
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem;">
+                        <i class="fas fa-map-marker-alt"></i> ${loc.name} &nbsp;|&nbsp;
+                        <i class="fas fa-tools"></i> ${skills.join(', ')} &nbsp;|&nbsp;
+                        <i class="fas fa-signal"></i> ${complexity}
+                        ${description ? `&nbsp;|&nbsp; <i class="fas fa-comment"></i> "${description.substring(0, 50)}${description.length > 50 ? '...' : ''}"` : ''}
+                    </div>
+                    <span class="match-quality ${qc}">${q} Match</span>
+                </div>
+                <div class="score-circle ${qc}">
+                    ${Math.round(result.score * 10) / 10}
+                    <span>/ 100</span>
+                </div>
+            </div>
+
+            <!-- Team Cards -->
+            <div class="team-cards">
+                <div class="team-card">
+                    <span class="role-badge senior"><i class="fas fa-user-tie"></i> Senior Engineer</span>
+                    <h4>${result.senior.title}</h4>
+                    <div class="email">${result.senior.email}</div>
+                    <div class="detail-row"><span class="detail-label">Skill Level</span><span>${result.senior.skillLevel}/5</span></div>
+                    <div class="detail-row"><span class="detail-label">Distance</span><span>${haversine(loc.lat, loc.lon, result.senior.latitude, result.senior.longitude).toFixed(1)} km</span></div>
+                    <div class="detail-row"><span class="detail-label">Training Load</span><span>${result.senior.trainingAssignmentCount} sessions</span></div>
+                    <div class="skill-tags-inline">
+                        ${(result.senior.skills || []).map(sk => `<span class="skill-tag">${sk}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="team-card">
+                    <span class="role-badge junior"><i class="fas fa-user-graduate"></i> Junior Engineer</span>
+                    <h4>${result.junior.title}</h4>
+                    <div class="email">${result.junior.email}</div>
+                    <div class="detail-row"><span class="detail-label">Skill Level</span><span>${result.junior.skillLevel}/5</span></div>
+                    <div class="detail-row"><span class="detail-label">Distance</span><span>${haversine(loc.lat, loc.lon, result.junior.latitude, result.junior.longitude).toFixed(1)} km</span></div>
+                    <div class="detail-row"><span class="detail-label">Training Load</span><span>${result.junior.trainingAssignmentCount} sessions</span></div>
+                    <div class="skill-tags-inline">
+                        ${(result.junior.skills || []).map(sk => `<span class="skill-tag">${sk}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Breakdown -->
+            <div class="score-breakdown">
+                <h4><i class="fas fa-chart-bar"></i> Score Breakdown (6-Factor ML Scoring)</h4>
+                ${renderScoreBar('Geographic Proximity', s.geographic, maxGeo, `${s.distance_km} km avg`)}
+                ${renderScoreBar('Skill Match', s.skill_match, maxSkill, `Senior L${s.senior_expertise}, Junior overlap ${s.junior_skill_overlap}`)}
+                ${renderScoreBar('Training Fairness', s.training_fairness, maxFair, `${s.junior_training_count} sessions, ${s.days_since_training}d since last`)}
+                ${renderScoreBar('History Diversity', s.history_diversity, maxHist, `${s.previous_pairings} prior pairings`)}
+                ${renderScoreBar('Skill Balancing', s.skill_balancing, maxBal, `Gap: ${s.skill_gap} levels`)}
+                ${renderScoreBar('Workload Balance', s.workload_balance, maxWork, '')}
+                ${s.ml_cluster_bonus !== '0%' ? `<div style="margin-top:0.5rem;font-size:0.88rem;color:var(--accent-secondary);">
+                    <i class="fas fa-star"></i> Cross-cluster diversity bonus: +${s.ml_cluster_bonus}</div>` : ''}
+            </div>
+
+            <!-- ML Weights -->
+            <div class="weights-table">
+                <h4><i class="fas fa-weight-hanging"></i> ML-Optimized Weights (Learned from ${TRAINING_HISTORY.length} training sessions)</h4>
+                <div class="weights-grid">
+                    ${Object.entries(mlWeights).map(([k, v]) =>
+                        `<div class="weight-item">
+                            <div class="w-value">${(v * 100).toFixed(1)}%</div>
+                            <div class="w-label">${k.replace('_', ' ')}</div>
+                        </div>`
+                    ).join('')}
+                </div>
+            </div>
+
+            <!-- ML Metadata -->
+            <div class="ml-metadata">
+                <h4><i class="fas fa-microchip"></i> ML Engine Metadata</h4>
+                <div class="ml-grid">
+                    <div class="ml-stat"><div class="stat-label">Model Version</div><div class="stat-value">${meta.model_version}</div></div>
+                    <div class="ml-stat"><div class="stat-label">Weights Source</div><div class="stat-value">${meta.weights_source}</div></div>
+                    <div class="ml-stat"><div class="stat-label">Training Samples</div><div class="stat-value">${meta.training_samples}</div></div>
+                    <div class="ml-stat"><div class="stat-label">Clusters Found</div><div class="stat-value">${meta.engineer_clusters_identified}</div></div>
+                    <div class="ml-stat"><div class="stat-label">Confidence</div><div class="stat-value">${meta.prediction_confidence}</div></div>
+                    <div class="ml-stat"><div class="stat-label">Pairs Evaluated</div><div class="stat-value">${seniorCount} × ${juniorCount} = ${seniorCount * juniorCount}</div></div>
+                </div>
+            </div>
+
+            ${alertsHTML}
+
+            <!-- Reasoning -->
+            <div class="reasoning-card">
+                <h4><i class="fas fa-lightbulb"></i> AI Reasoning</h4>
+                <p>${result.reasoning.summary}</p>
+            </div>
+        </div>`;
+
+        document.getElementById('ias-results').innerHTML = html;
+
+        // Animate score bars after render
+        requestAnimationFrame(() => {
+            document.querySelectorAll('.score-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width;
+            });
+        });
+    }
+
+    function renderScoreBar(label, value, max, detail) {
+        const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
+        return `<div class="score-bar-row">
+            <div class="score-bar-label">
+                <span>${label} ${detail ? `<span style="opacity:0.6;font-size:0.8rem;">(${detail})</span>` : ''}</span>
+                <span class="score-val">${value.toFixed(1)}</span>
+            </div>
+            <div class="score-bar-track">
+                <div class="score-bar-fill" style="width:0%" data-width="${pct.toFixed(1)}%"></div>
+            </div>
+        </div>`;
+    }
+
+    // ---- ENGINEER POOL RENDERING ----
+
+    function getEngineerCity(e) {
+        const lat = e.latitude || 0, lon = e.longitude || 0;
+        if (lat > 59.7) return 'Uppsala';
+        if (lat > 58.5) return 'Stockholm';
+        if (lat > 56.5) return 'Gothenburg';
+        return 'Malmö';
+    }
+
+    function renderEngineerPool() {
+        const grid = document.getElementById('engineer-pool-grid');
+        if (!grid) return;
+        grid.innerHTML = ENGINEERS.map(e => `
+            <div class="pool-card">
+                <div class="pool-name">${e.title}</div>
+                <div class="pool-level">${e.engineerLevel} · Level ${e.skillLevel}/5 · ${e.trainingAssignmentCount} sessions</div>
+                <div class="pool-level" style="margin-top:0.15rem;"><i class="fas fa-map-marker-alt" style="font-size:0.75rem;"></i> ${getEngineerCity(e)}</div>
+                <div class="pool-skills">
+                    ${(e.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                    ${e.skills.length === 0 ? '<span style="color:var(--text-muted);font-size:0.82rem;">No skills yet</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ---- INIT ----
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Theme
+        const themeSelect = document.getElementById('theme-select');
+        const root = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || '';
+        if (currentTheme) root.setAttribute('data-theme', currentTheme);
+        if (themeSelect) {
+            themeSelect.value = currentTheme || 'midnight';
+            themeSelect.addEventListener('change', e => {
+                const theme = e.target.value;
+                if (theme === 'midnight') { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); }
+                else { root.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+            });
+        }
+
+        // Mobile nav
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        const navbar = document.querySelector('.navbar');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                menuToggle.querySelector('i').classList.toggle('fa-bars');
+                menuToggle.querySelector('i').classList.toggle('fa-times');
+            });
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    menuToggle.querySelector('i').classList.remove('fa-times');
+                    menuToggle.querySelector('i').classList.add('fa-bars');
+                });
+            });
+        }
+
+        // Scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        renderEngineerPool();
+    });
+    </script>
+
+</body>
+</html>

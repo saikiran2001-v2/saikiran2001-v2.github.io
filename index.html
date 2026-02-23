@@ -29,8 +29,14 @@
         <div class="container nav-container">
             <a href="#" class="logo">Sai<span class="accent">kiran</span>.</a>
             <ul class="nav-links">
-                <li><a href="#power-apps">Power Apps</a></li>
-                <li><a href="#projects">Projects</a></li>
+                <li class="nav-dropdown">
+                    <a href="#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="ias-demo.html">IAS Demo</a></li>
                 <li><a href="#linux-works">Linux Works</a></li>
                 <li><a href="rust-playground.html">My Rust Playground</a></li>
                 <li><a href="blog.html">Blogs</a></li>
@@ -67,7 +73,6 @@
         <div class="hero-background">
             <div class="blur-circle circle-1"></div>
             <div class="blur-circle circle-2"></div>
-        </div>
         </div>
     </section>
 
@@ -118,10 +123,10 @@
             </div>
         </div>
     </section>
-    <section id="power-apps" class="section">
+    <section id="professional-projects" class="section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Power Apps <span class="accent">Showcase</span></h2>
+                <h2 class="section-title">Professional <span class="accent">Projects</span></h2>
                 <p class="section-subtitle">Enterprise-grade solutions built with Microsoft Power Platform.</p>
             </div>
 
@@ -215,7 +220,7 @@
                         </div>
                     </div>
                 </article>
-                <article class="project-card glass-card">
+                <article class="project-card glass-card" onclick="window.location.href='ias-demo.html'" style="cursor:pointer;">
                     <div class="project-info">
                         <h3>Intelligent Apprentice System</h3>
                         <p><strong>ML-powered</strong> field engineer assignment system with genetic scheduling
@@ -225,6 +230,7 @@
                             <i class="fas fa-brain"></i>
                             <i class="fab fa-aws"></i>
                         </div>
+                        <a href="ias-demo.html" class="ias-demo-btn" onclick="event.stopPropagation();"><i class="fas fa-play"></i> Try Live Demo</a>
                     </div>
                 </article>
                 <article class="project-card glass-card">
@@ -257,7 +263,6 @@
                 <p>Awarded by TCS (at 1.8 years experience) for saving the client <strong>$50,000+ annually</strong>
                     through soft savings.</p>
             </div>
-        </div>
         </div>
     </section>
 
