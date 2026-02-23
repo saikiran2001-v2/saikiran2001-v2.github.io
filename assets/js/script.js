@@ -1,5 +1,13 @@
 // assets/js/script.js
 
+function copyEmail(btn) {
+    navigator.clipboard.writeText('bjsaikiran@gmail.com').then(function() {
+        var tooltip = btn.querySelector('.copy-tooltip');
+        tooltip.classList.add('show');
+        setTimeout(function() { tooltip.classList.remove('show'); }, 1500);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Theme Management
     const themeSelect = document.getElementById('theme-select');
