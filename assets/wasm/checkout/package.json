@@ -1,0 +1,15 @@
+{
+  "name": "checkout_system",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "checkout_system_bg.wasm",
+    "checkout_system.js",
+    "checkout_system.d.ts"
+  ],
+  "main": "checkout_system.js",
+  "types": "checkout_system.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Checkout System | Live Demo</title>
+    <meta name="description" content="Interactive shopping checkout demo powered by Rust WebAssembly.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .checkout-hero {
+            padding: 120px 0 40px;
+            text-align: center;
+        }
+
+        .checkout-hero .section-subtitle {
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+        }
+
+        .checkout-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(227, 119, 52, 0.15);
+            border: 1px solid rgba(227, 119, 52, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: #e37734;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .checkout-badge i {
+            font-size: 0.75rem;
+        }
+
+        /* Layout */
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            align-items: start;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .product-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .product-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-3px);
+        }
+
+        .product-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .product-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .product-price {
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.2rem;
+            background: var(--accent-primary);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-add:hover {
+            background: var(--accent-secondary);
+            transform: scale(1.05);
+        }
+
+        /* Cart Panel */
+        .cart-panel {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .cart-panel h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-panel h3 i {
+            color: var(--accent-primary);
+        }
+
+        .cart-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-primary);
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 0.3rem;
+        }
+
+        .cart-items {
+            min-height: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .cart-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .cart-empty i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            opacity: 0.4;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-item-qty {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .cart-item-remove:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Promo Section */
+        .promo-section {
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid var(--surface-border);
+        }
+
+        .promo-section label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        .promo-section select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--surface-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            padding-right: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .promo-section select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .promo-section select option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        [data-theme="light"] .promo-section select {
+            background-color: rgba(0, 0, 0, 0.05);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        }
+
+        [data-theme="light"] .promo-section select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        [data-theme="glass"] .promo-section select {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #111827;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        }
+
+        [data-theme="glass"] .promo-section select option {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .promo-applied {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .promo-applied.show {
+            display: flex;
+        }
+
+        /* Totals */
+        .cart-totals {
+            border-top: 1px solid var(--surface-border);
+            padding-top: 1rem;
+        }
+
+        .cart-totals .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+        }
+
+        .cart-totals .total-row.discount {
+            color: #22c55e;
+        }
+
+        .cart-totals .total-row.grand-total {
+            font-size: 1.15rem;
+            font-weight: 700;
+            padding-top: 0.6rem;
+            border-top: 2px solid var(--accent-primary);
+            margin-top: 0.4rem;
+        }
+
+        /* Checkout Button */
+        .btn-checkout {
+            width: 100%;
+            padding: 0.85rem;
+            margin-top: 1rem;
+            background: var(--accent-primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-checkout:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-checkout:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-clear {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.5rem;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-clear:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* Receipt Modal */
+        .receipt-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .receipt-overlay.show {
+            display: flex;
+        }
+
+        .receipt-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .receipt-header {
+            background: #2d2d2d;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .receipt-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #d4d4d4;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .receipt-confetti {
+            text-align: center;
+            font-size: 1rem;
+            color: #fbbf24;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: rgba(251, 191, 36, 0.08);
+            border-radius: 8px;
+        }
+
+        .receipt-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .receipt-actions button {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-close-receipt {
+            background: var(--accent-primary);
+            color: #fff;
+        }
+
+        .btn-close-receipt:hover {
+            background: var(--accent-secondary);
+        }
+
+        .btn-new-cart {
+            background: transparent;
+            border: 1px solid #555 !important;
+            color: #d4d4d4;
+        }
+
+        .btn-new-cart:hover {
+            border-color: var(--accent-primary) !important;
+            color: var(--accent-primary);
+        }
+
+        /* Rust Source Section */
+        .source-section {
+            margin-top: 3rem;
+        }
+
+        .source-box {
+            background: #282c34;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #abb2bf;
+            line-height: 1.6;
+        }
+
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .num { color: #d19a66; }
+        .comment { color: #5c6370; font-style: italic; }
+        .func { color: #61afef; }
+        .type { color: #e5c07b; }
+
+        /* Add to cart animation */
+        @keyframes cartBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .cart-bounce {
+            animation: cartBounce 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <li class="theme-select-wrapper">
+                    <select id="theme-select" class="theme-select">
+                        <option value="midnight">Midnight</option>
+                        <option value="blue">Blueish</option>
+                        <option value="glass">Glass</option>
+                        <option value="light">Light</option>
+                    </select>
+                    <i class="fas fa-palette theme-icon"></i>
+                </li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="checkout-hero">
+        <div class="container">
+            <div class="checkout-badge"><i class="fab fa-rust"></i> Rust + WebAssembly</div>
+            <h1 class="section-title">Checkout <span class="accent">System</span></h1>
+            <p class="section-subtitle">
+                A shopping cart with promo codes — the entire checkout engine runs as compiled Rust WebAssembly.
+                Add items, apply discounts, and get a real receipt generated by Rust code in your browser.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="checkout-layout">
+                <!-- Left: Products -->
+                <div>
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-store" style="color: var(--accent-primary);"></i> Shop</h3>
+                    <div class="products-grid" id="products-grid"></div>
+                </div>
+
+                <!-- Right: Cart -->
+                <div class="cart-panel">
+                    <h3><i class="fas fa-shopping-cart"></i> Cart <span class="cart-badge" id="cart-count">0</span></h3>
+
+                    <div class="cart-items" id="cart-items">
+                        <div class="cart-empty" id="cart-empty">
+                            <i class="fas fa-shopping-basket"></i>
+                            Your cart is empty
+                        </div>
+                    </div>
+
+                    <div class="promo-section">
+                        <label for="promo-select"><i class="fas fa-tag"></i> Promo Code</label>
+                        <select id="promo-select">
+                            <option value="none">No Promo</option>
+                            <option value="percent-10">SAVE10 — 10% Off</option>
+                            <option value="percent-20">MEGA20 — 20% Off</option>
+                            <option value="flat-500">FLAT5 — $5.00 Off</option>
+                            <option value="flat-1000">SUPER10 — $10.00 Off</option>
+                            <option value="percent-50">HALF50 — 50% Off</option>
+                        </select>
+                        <div class="promo-applied" id="promo-applied">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="promo-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="cart-totals" id="cart-totals" style="display:none;">
+                        <div class="total-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="total-row discount" id="discount-row" style="display:none;">
+                            <span id="discount-label">Discount</span>
+                            <span id="discount-amount">-$0.00</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>Total</span>
+                            <span id="grand-total">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-checkout" id="btn-checkout" disabled onclick="checkout()">
+                        <i class="fas fa-receipt"></i> Checkout
+                    </button>
+                    <button class="btn-clear" id="btn-clear" onclick="clearCart()" style="display:none;">
+                        <i class="fas fa-trash-alt"></i> Clear Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Source Code -->
+            <div class="source-section">
+                <div class="section-header">
+                    <h2 class="section-title">Rust <span class="accent">Source</span></h2>
+                    <p class="section-subtitle">The WASM module powering this checkout — compiled from the Rust code below.</p>
+                </div>
+                <div class="source-box">
+                    <pre id="source-code"></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Receipt Modal -->
+    <div class="receipt-overlay" id="receipt-overlay">
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span style="color: #999; font-size: 0.85rem; margin-left: 0.5rem;">checkout_system.wasm — receipt</span>
+            </div>
+            <div class="receipt-confetti" id="receipt-confetti" style="display:none;"></div>
+            <div class="receipt-body" id="receipt-body"></div>
+            <div class="receipt-actions">
+                <button class="btn-new-cart" onclick="newCart()">New Cart</button>
+                <button class="btn-close-receipt" onclick="closeReceipt()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <a href="mailto:bjsaikiran@gmail.com" class="email-link">bjsaikiran@gmail.com</a>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Saikiran. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+    <script type="module">
+        import init, { ShoppingCart } from './assets/wasm/checkout/checkout_system.js';
+
+        let cart = null;
+        let wasmReady = false;
+
+        const PRODUCTS = [
+            { name: "Rust Book", price: 3000, icon: "fas fa-book" },
+            { name: "Keyboard", price: 12000, icon: "fas fa-keyboard" },
+            { name: "Monitor", price: 35000, icon: "fas fa-desktop" },
+            { name: "Mouse", price: 2500, icon: "fas fa-mouse" },
+            { name: "USB-C Hub", price: 4500, icon: "fas fa-plug" },
+            { name: "Webcam", price: 7500, icon: "fas fa-video" },
+            { name: "Headphones", price: 9000, icon: "fas fa-headphones" },
+            { name: "Desk Lamp", price: 3500, icon: "fas fa-lightbulb" },
+        ];
+
+        async function initWasm() {
+            await init();
+            cart = new ShoppingCart();
+            wasmReady = true;
+            renderProducts();
+            renderSourceCode();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = PRODUCTS.map((p, i) => `
+                <div class="product-card">
+                    <div class="product-icon"><i class="${p.icon}"></i></div>
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">$${(p.price / 100).toFixed(2)}</div>
+                    <button class="btn-add" onclick="window.addToCart(${i})">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function getPromo() {
+            const val = document.getElementById('promo-select').value;
+            if (val === 'none') return { type: 'none', value: 0 };
+            const [type, amount] = val.split('-');
+            return { type, value: parseInt(amount) };
+        }
+
+        function updateCartUI() {
+            if (!cart) return;
+
+            const count = cart.get_item_count();
+            const countEl = document.getElementById('cart-count');
+            countEl.textContent = count;
+            countEl.classList.remove('cart-bounce');
+            void countEl.offsetWidth;
+            countEl.classList.add('cart-bounce');
+
+            const itemsEl = document.getElementById('cart-items');
+            const emptyEl = document.getElementById('cart-empty');
+            const totalsEl = document.getElementById('cart-totals');
+            const checkoutBtn = document.getElementById('btn-checkout');
+            const clearBtn = document.getElementById('btn-clear');
+
+            if (count === 0) {
+                itemsEl.innerHTML = '<div class="cart-empty" id="cart-empty"><i class="fas fa-shopping-basket"></i>Your cart is empty</div>';
+                totalsEl.style.display = 'none';
+                checkoutBtn.disabled = true;
+                clearBtn.style.display = 'none';
+                document.getElementById('discount-row').style.display = 'none';
+                document.getElementById('promo-applied').classList.remove('show');
+                return;
+            }
+
+            // Parse items JSON from WASM
+            const itemsJson = cart.get_items_json();
+            const items = JSON.parse(itemsJson);
+
+            itemsEl.innerHTML = items.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <span class="cart-item-qty">${item.qty}x</span>
+                        <span class="cart-item-name">${item.name}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span class="cart-item-price">$${(item.qty * item.price / 100).toFixed(2)}</span>
+                        <button class="cart-item-remove" onclick="window.removeFromCart('${item.name}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            const promo = getPromo();
+            const subtotal = cart.get_subtotal();
+            const discount = cart.get_discount_amount(promo.type, promo.value);
+            const total = cart.calculate_total(promo.type, promo.value);
+
+            document.getElementById('subtotal').textContent = `$${(subtotal / 100).toFixed(2)}`;
+            document.getElementById('grand-total').textContent = `$${(total / 100).toFixed(2)}`;
+
+            const discountRow = document.getElementById('discount-row');
+            const promoApplied = document.getElementById('promo-applied');
+
+            if (discount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('discount-amount').textContent = `-$${(discount / 100).toFixed(2)}`;
+                const label = promo.type === 'percent' ? `${promo.value}% off` : `$${(promo.value / 100).toFixed(2)} off`;
+                document.getElementById('discount-label').textContent = `Discount (${label})`;
+                promoApplied.classList.add('show');
+                document.getElementById('promo-msg').textContent = cart.check_for_confetti(promo.type, promo.value);
+            } else {
+                discountRow.style.display = 'none';
+                promoApplied.classList.remove('show');
+            }
+
+            totalsEl.style.display = 'block';
+            checkoutBtn.disabled = false;
+            clearBtn.style.display = 'block';
+        }
+
+        window.addToCart = function(index) {
+            if (!wasmReady) return;
+            const product = PRODUCTS[index];
+            cart.add_item(product.name, product.price);
+            updateCartUI();
+        };
+
+        window.removeFromCart = function(name) {
+            if (!wasmReady) return;
+            cart.remove_item(name);
+            updateCartUI();
+        };
+
+        window.clearCart = function() {
+            if (!wasmReady) return;
+            cart.clear();
+            document.getElementById('promo-select').value = 'none';
+            updateCartUI();
+        };
+
+        window.checkout = function() {
+            if (!wasmReady || cart.get_item_count() === 0) return;
+            const promo = getPromo();
+            const receipt = cart.generate_receipt(promo.type, promo.value);
+            const confetti = cart.check_for_confetti(promo.type, promo.value);
+
+            document.getElementById('receipt-body').textContent = receipt;
+
+            const confettiEl = document.getElementById('receipt-confetti');
+            if (promo.type !== 'none') {
+                confettiEl.textContent = confetti;
+                confettiEl.style.display = 'block';
+            } else {
+                confettiEl.style.display = 'none';
+            }
+
+            document.getElementById('receipt-overlay').classList.add('show');
+        };
+
+        window.closeReceipt = function() {
+            document.getElementById('receipt-overlay').classList.remove('show');
+        };
+
+        window.newCart = function() {
+            document.getElementById('receipt-overlay').classList.remove('show');
+            cart.clear();
+            document.getElementById('promo-select').value = 'none';
+            updateCartUI();
+        };
+
+        // Update cart when promo changes
+        document.getElementById('promo-select').addEventListener('change', updateCartUI);
+
+        // Close modal on overlay click
+        document.getElementById('receipt-overlay').addEventListener('click', function(e) {
+            if (e.target === this) closeReceipt();
+        });
+
+        function renderSourceCode() {
+            document.getElementById('source-code').innerHTML = `<span class="comment">// checkout_system/src/lib.rs — Compiled to WebAssembly</span>
+<span class="keyword">use</span> wasm_bindgen::prelude::*;
+<span class="keyword">use</span> std::collections::<span class="type">HashMap</span>;
+
+<span class="keyword">#[wasm_bindgen]</span>
+<span class="keyword">pub struct</span> <span class="type">ShoppingCart</span> {
+    items: <span class="type">Vec</span>&lt;<span class="type">Item</span>&gt;,
+}
+
+<span class="keyword">#[wasm_bindgen]</span>
+<span class="keyword">impl</span> <span class="type">ShoppingCart</span> {
+    <span class="keyword">pub fn</span> <span class="func">add_item</span>(&amp;<span class="keyword">mut self</span>, name: &amp;<span class="type">str</span>, price: <span class="type">i32</span>) {
+        <span class="keyword">self</span>.items.<span class="func">push</span>(<span class="type">Item</span>::<span class="func">new</span>(name, price));
+    }
+
+    <span class="keyword">pub fn</span> <span class="func">calculate_total</span>(&amp;<span class="keyword">self</span>, promo_type: &amp;<span class="type">str</span>, promo_value: <span class="type">i32</span>) -> <span class="type">i32</span> {
+        <span class="keyword">let</span> subtotal = <span class="keyword">self</span>.<span class="func">get_subtotal</span>();
+        <span class="keyword">let</span> discount = <span class="keyword">match</span> promo_type {
+            <span class="string">"flat"</span> => promo_value,
+            <span class="string">"percent"</span> => subtotal * promo_value / <span class="num">100</span>,
+            _ => <span class="num">0</span>,
+        };
+        (subtotal - discount).<span class="func">max</span>(<span class="num">0</span>)
+    }
+
+    <span class="keyword">pub fn</span> <span class="func">generate_receipt</span>(&amp;<span class="keyword">self</span>, promo_type: &amp;<span class="type">str</span>, promo_value: <span class="type">i32</span>) -> <span class="type">String</span> {
+        <span class="keyword">let mut</span> item_counts: <span class="type">HashMap</span>&lt;&amp;<span class="type">str</span>, (<span class="type">i32</span>, <span class="type">i32</span>)&gt; = <span class="type">HashMap</span>::<span class="func">new</span>();
+        <span class="keyword">for</span> item <span class="keyword">in</span> &amp;<span class="keyword">self</span>.items {
+            <span class="keyword">let</span> entry = item_counts.<span class="func">entry</span>(&amp;item.name).<span class="func">or_insert</span>((<span class="num">0</span>, item.price));
+            entry.<span class="num">0</span> += <span class="num">1</span>;
+        }
+        <span class="comment">// Generates formatted receipt with totals...</span>
+    }
+
+    <span class="keyword">pub fn</span> <span class="func">check_for_confetti</span>(&amp;<span class="keyword">self</span>, promo_type: &amp;<span class="type">str</span>, promo_value: <span class="type">i32</span>) -> <span class="type">String</span> {
+        <span class="keyword">match</span> promo_type {
+            <span class="string">"percent"</span> => <span class="func">format!</span>(<span class="string">"CONFETTI! You saved {}%!"</span>, promo_value),
+            <span class="string">"flat"</span> => <span class="func">format!</span>(<span class="string">"Nice! discount applied!"</span>),
+            _ => <span class="type">String</span>::<span class="func">from</span>(<span class="string">"No promo applied"</span>),
+        }
+    }
+}`;
+        }
+
+        initWasm();
+    </script>
+</body>
+
+</html>
