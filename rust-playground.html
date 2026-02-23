@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saikiran | Rust Playground</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <meta name="description" content="Play Rust-based CLI games directly in the browser.">
+    <meta property="og:title" content="Saikiran | Rust Playground">
+    <meta property="og:description" content="Play Rust-based CLI games directly in the browser.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/favicon.svg">
+    <meta name="twitter:card" content="summary">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -170,7 +176,7 @@
                 <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
                 <!-- Theme Toggle -->
                 <li class="theme-select-wrapper">
-                    <select id="theme-select" class="theme-select">
+                    <select id="theme-select" class="theme-select" aria-label="Choose color theme">
                         <option value="midnight">Midnight</option>
                         <option value="blue">Blueish</option>
                         <option value="glass">Glass</option>
@@ -179,9 +185,9 @@
                     <i class="fas fa-palette theme-icon"></i>
                 </li>
             </ul>
-            <div class="menu-toggle">
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
                 <i class="fas fa-bars"></i>
-            </div>
+            </button>
         </div>
     </nav>
 
@@ -218,7 +224,9 @@
                         <span class="terminal-title" id="terminal-title">user@rust-game:~/alpha_guess</span>
                     </div>
                     <!-- Note: Content is empty initially to be filled by JS to avoid whitespace issues -->
-                    <div class="terminal-content" id="terminal-output"></div>
+                    <div class="terminal-content" id="terminal-output">
+                        <div class="wasm-loader" id="wasm-loader"><div class="spinner"></div>Initializing Rust WASM...</div>
+                    </div>
                     <div class="input-line">
                         <span class="prompt" style="color: #27c93f; font-weight: bold;">$</span>
                         <input type="text" class="cmd-input" id="cmd-input" autocomplete="off" autofocus>
@@ -246,16 +254,16 @@
                 <div class="footer-buttons">
                     <div class="footer-buttons-row">
                         <a href="mailto:bjsaikiran@gmail.com" class="email-link"><i class="fas fa-envelope"></i> bjsaikiran@gmail.com</a>
-                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
+                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email" aria-label="Copy email address"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
                     </div>
                     <a href="assets/Saikiran_Resume.pdf" download class="btn btn-secondary"><i class="fas fa-download"></i> Download Resume</a>
                 </div>
             </div>
             <div class="footer-socials">
-                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon"><i
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon" aria-label="GitHub profile"><i
                         class="fab fa-github"></i></a>
                 <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank"
-                    class="social-icon"><i class="fab fa-linkedin"></i></a>
+                    class="social-icon" aria-label="LinkedIn profile"><i class="fab fa-linkedin"></i></a>
             </div>
         </div>
         <div class="footer-bottom">
@@ -266,24 +274,42 @@
     <!-- Scripts -->
     <script src="assets/js/script.js"></script>
     <script type="module">
-        // --- Load WASM Modules ---
-        import init_tip, { TipCalculator } from './assets/wasm/tip_calc/tip_calc.js';
-        import init_alpha, { AlphaGuessGame } from './assets/wasm/alpha_guess/alpha_guess_game.js';
-        import init_number, { NumberGuessGame } from './assets/wasm/number_guess/guessing_game.js';
+        // --- Lazy-load WASM Modules on demand ---
+        let init_tip, TipCalculator, init_alpha, AlphaGuessGame, init_number, NumberGuessGame;
+        const wasmInit = { tip: false, alpha: false, number: false };
 
         let currentGame = null;
         let currentGameType = '';
-        let wasmLoaded = false;
+        let wasmLoaded = true;
 
         const terminalOutput = document.getElementById('terminal-output');
         const cmdInput = document.getElementById('cmd-input');
         const sourceCodePre = document.getElementById('source-code');
         const terminalTitle = document.getElementById('terminal-title');
 
-        // Initialize WASM modules
+        // Initialize only the WASM module needed for the selected game
+        async function ensureWasm(gameType) {
+            if (gameType === 'tipcalc' && !wasmInit.tip) {
+                const mod = await import('./assets/wasm/tip_calc/tip_calc.js');
+                init_tip = mod.default; TipCalculator = mod.TipCalculator;
+                await init_tip();
+                wasmInit.tip = true;
+            } else if (gameType === 'alpha' && !wasmInit.alpha) {
+                const mod = await import('./assets/wasm/alpha_guess/alpha_guess_game.js');
+                init_alpha = mod.default; AlphaGuessGame = mod.AlphaGuessGame;
+                await init_alpha();
+                wasmInit.alpha = true;
+            } else if (gameType === 'number' && !wasmInit.number) {
+                const mod = await import('./assets/wasm/number_guess/guessing_game.js');
+                init_number = mod.default; NumberGuessGame = mod.NumberGuessGame;
+                await init_number();
+                wasmInit.number = true;
+            }
+        }
+
+        // Initialize default game
         async function initWasm() {
-            await Promise.all([init_tip(), init_alpha(), init_number()]);
-            wasmLoaded = true;
+            await ensureWasm('tipcalc');
             switchGame('tipcalc', null);
         }
 
@@ -460,12 +486,7 @@
             }
         }
 
-        window.switchGame = function (gameType, btnElement) {
-            if (!wasmLoaded) {
-                addToTerminal("Loading WASM modules...");
-                return;
-            }
-
+        window.switchGame = async function (gameType, btnElement) {
             if (currentGameType === gameType) return;
             currentGameType = gameType;
 
@@ -478,6 +499,10 @@
 
             terminalOutput.innerHTML = '';
             cmdInput.value = '';
+
+            addToTerminal("Loading WASM module...");
+            await ensureWasm(gameType);
+            terminalOutput.innerHTML = '';
 
             if (gameType === 'tipcalc') {
                 currentGame = new TipCalcWrapper();

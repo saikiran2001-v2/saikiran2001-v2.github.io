@@ -536,6 +536,10 @@ img {
     display: none;
     font-size: 1.5rem;
     cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    padding: 0;
 }
 
 /* Hero Section */
@@ -1110,4 +1114,49 @@ footer {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+/* ===== Scroll Animations ===== */
+.scroll-fade {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-fade {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* ===== WASM Loading Spinner ===== */
+.wasm-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.wasm-loader .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--surface-border);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

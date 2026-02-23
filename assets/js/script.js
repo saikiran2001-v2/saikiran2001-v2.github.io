@@ -64,41 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Scroll Animations (Intersection Observer)
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px"
-    };
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-                observer.unobserve(entry.target); // Only animate once
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
-    // Target elements to animate
-    const animateElements = document.querySelectorAll('.section-title, .section-subtitle, .card, .project-card, .terminal-window, .achievements-banner');
-    animateElements.forEach((el, index) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-        el.style.willChange = 'opacity, transform'; // Performance optimization
-        // Stagger animations slightly
-        el.style.transitionDelay = `${index % 3 * 0.1}s`;
+    document.querySelectorAll('.section-title, .section-subtitle, .glass-card, .project-card, .terminal-window, .achievements-banner, .skill-category').forEach((el, i) => {
+        el.classList.add('scroll-fade');
+        el.style.transitionDelay = `${(i % 3) * 0.1}s`;
         observer.observe(el);
     });
-
-    // Add class for the actual animation
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = `
-        .animate-in {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
-    `;
-    document.head.appendChild(styleSheet);
 
     // Terminal Typewriter Effect (Simulated)
     const terminalCursor = document.querySelector('.cursor');
