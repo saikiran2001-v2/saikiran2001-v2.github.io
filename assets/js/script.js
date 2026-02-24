@@ -142,21 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
         navLinks.setAttribute('aria-label', 'Main navigation');
     }
 
-    // ── View Transitions API ──────────────────────────────────────────────────
-    if (document.startViewTransition) {
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href]');
-            if (!link) return;
-            const url = new URL(link.href, location.href);
-            // Only handle same-origin, non-anchor, non-download links
-            if (url.origin !== location.origin) return;
-            if (url.pathname === location.pathname && url.hash) return;
-            if (link.hasAttribute('download') || link.target === '_blank') return;
-            e.preventDefault();
-            document.startViewTransition(() => {
-                location.href = link.href;
-            });
-        });
+    // ── Service Worker Registration ────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
     // ── Contact Form Handling ─────────────────────────────────────────────────

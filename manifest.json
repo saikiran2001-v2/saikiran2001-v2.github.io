@@ -1,0 +1,17 @@
+{
+    "name": "Saikiran — Portfolio",
+    "short_name": "Saikiran",
+    "description": "Portfolio of Jaya Saikiran Banigallapati: Power Apps developer and Linux Kernel contributor.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#3b82f6",
+    "icons": [
+        {
+            "src": "assets/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

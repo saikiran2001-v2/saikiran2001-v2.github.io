@@ -1054,21 +1054,21 @@ footer {
 }
 
 ::view-transition-old(root) {
-    animation: fade-out 0.15s ease-in forwards;
+    animation: vt-slide-out 0.25s ease-in forwards;
 }
 
 ::view-transition-new(root) {
-    animation: fade-in 0.15s ease-out forwards;
+    animation: vt-slide-in 0.25s ease-out forwards;
 }
 
-@keyframes fade-out {
-    from { opacity: 1; }
-    to   { opacity: 0; }
+@keyframes vt-slide-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-12px); }
 }
 
-@keyframes fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+@keyframes vt-slide-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== Skip to Content (Accessibility) ===== */
