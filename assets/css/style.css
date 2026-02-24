@@ -1096,7 +1096,7 @@ footer {
 
 /* ===== Contact Form ===== */
 .contact-divider {
-    margin: 1.2rem 0 0.2rem;
+    margin: 2rem 0 0.5rem;
     font-size: 0.95rem;
     color: var(--text-muted);
     font-style: italic;

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Bank Ledger | Live Demo</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <meta name="description" content="Interactive bank ledger demo powered by Rust WebAssembly — deposits, withdrawals, and statements.">
+    <meta property="og:title" content="Rust Bank Ledger | Live Demo">
+    <meta property="og:description" content="Interactive bank ledger demo powered by Rust WebAssembly — deposits, withdrawals, and statements.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/favicon.svg">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .ledger-hero {
+            padding: 120px 0 40px;
+            text-align: center;
+        }
+
+        .ledger-hero .section-subtitle {
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+        }
+
+        .ledger-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Layout */
+        .ledger-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .ledger-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 16px;
+            padding: 2rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-bottom: 0.25rem;
+        }
+
+        .balance-amount {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .balance-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Transaction Form */
+        .txn-form {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .txn-form h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-row .field {
+            flex: 1;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--surface-border);
+            background: var(--bg-color, #0d1117);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .txn-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-deposit {
+            flex: 1;
+            padding: 0.65rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: #22c55e;
+            color: #fff;
+            transition: var(--transition);
+        }
+
+        .btn-deposit:hover {
+            background: #16a34a;
+        }
+
+        .btn-withdraw {
+            flex: 1;
+            padding: 0.65rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: #ef4444;
+            color: #fff;
+            transition: var(--transition);
+        }
+
+        .btn-withdraw:hover {
+            background: #dc2626;
+        }
+
+        /* Quick presets */
+        .quick-presets {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-presets button {
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-presets button:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Transaction History */
+        .history-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .history-panel h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .txn-list {
+            max-height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .txn-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .txn-item:hover {
+            border-color: var(--surface-border);
+        }
+
+        .txn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .txn-icon.deposit {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .txn-icon.withdraw {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .txn-icon.open {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .txn-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .txn-memo {
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .txn-type {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .txn-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .txn-amount.positive {
+            color: #22c55e;
+        }
+
+        .txn-amount.negative {
+            color: #ef4444;
+        }
+
+        .txn-amount.neutral {
+            color: #3b82f6;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.success {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .toast.error {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Statement modal */
+        .statement-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .statement-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .statement-modal {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 550px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .statement-modal h3 {
+            margin-bottom: 1rem;
+        }
+
+        .statement-modal pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #22c55e;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .statement-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-statement {
+            padding: 0.6rem 1.25rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-close-stmt {
+            background: var(--surface-border);
+            color: var(--text-main);
+        }
+
+        .btn-close-stmt:hover {
+            opacity: 0.8;
+        }
+
+        /* Source Code Section */
+        .source-section {
+            margin-top: 3rem;
+        }
+
+        .source-section h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .source-code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #e4e4e7;
+        }
+
+        .source-code-block .keyword { color: #c678dd; }
+        .source-code-block .type { color: #e5c07b; }
+        .source-code-block .func { color: #61afef; }
+        .source-code-block .string { color: #98c379; }
+        .source-code-block .comment { color: #5c6370; font-style: italic; }
+        .source-code-block .num { color: #d19a66; }
+
+        .source-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #999;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Reset account button */
+        .btn-reset {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--surface-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-reset:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Hero -->
+    <section class="ledger-hero">
+        <div class="container">
+            <div class="ledger-badge"><i class="fab fa-rust"></i> Rust + WebAssembly</div>
+            <h1 class="section-title">Bank <span class="accent">Ledger</span></h1>
+            <p class="section-subtitle">
+                A bank account system with deposits, withdrawals, and full statement generation — the entire engine is compiled Rust running as WebAssembly in your browser.
+            </p>
+        </div>
+    </section>
+
+    <!-- Balance Card -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="balance-card">
+                <div class="balance-label">Current Balance</div>
+                <div class="balance-amount" id="balance-display">$0.00</div>
+                <div class="balance-meta">
+                    <span><i class="fas fa-exchange-alt"></i> <span id="txn-count">0</span> Transactions</span>
+                    <span><i class="fas fa-microchip"></i> Powered by Rust WASM</span>
+                </div>
+            </div>
+
+            <div class="ledger-layout">
+                <!-- Left: Transaction Form -->
+                <div>
+                    <div class="txn-form">
+                        <h3><i class="fas fa-plus-circle" style="color: var(--accent-primary);"></i> New Transaction</h3>
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="txn-amount">Amount ($)</label>
+                                <input type="number" id="txn-amount" placeholder="0.00" min="0.01" step="0.01">
+                            </div>
+                        </div>
+                        <label style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; display: block;">Quick Amount</label>
+                        <div class="quick-presets">
+                            <button onclick="setAmount(10)">$10</button>
+                            <button onclick="setAmount(25)">$25</button>
+                            <button onclick="setAmount(50)">$50</button>
+                            <button onclick="setAmount(100)">$100</button>
+                            <button onclick="setAmount(500)">$500</button>
+                        </div>
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="txn-memo">Memo</label>
+                                <input type="text" id="txn-memo" placeholder="e.g. Paycheck, Groceries..." maxlength="100">
+                            </div>
+                        </div>
+                        <div class="txn-actions">
+                            <button class="btn-deposit" onclick="doDeposit()"><i class="fas fa-arrow-down"></i> Deposit</button>
+                            <button class="btn-withdraw" onclick="doWithdraw()"><i class="fas fa-arrow-up"></i> Withdraw</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" style="flex:1;" onclick="showStatement()"><i class="fas fa-file-invoice-dollar"></i> View Statement</button>
+                        <button class="btn-reset" onclick="resetAccount()"><i class="fas fa-redo"></i> Reset</button>
+                    </div>
+                </div>
+
+                <!-- Right: Transaction History -->
+                <div class="history-panel">
+                    <h3><i class="fas fa-history" style="color: var(--accent-secondary);"></i> Transaction History</h3>
+                    <div class="txn-list" id="txn-list">
+                        <div class="wasm-loader" id="wasm-loader"><div class="spinner"></div>Loading WASM engine...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Code -->
+            <div class="source-section">
+                <h2 class="section-title" style="font-size: 1.5rem;">Source <span class="accent">Code</span></h2>
+                <p class="section-subtitle">The WASM module powering this ledger — compiled from the Rust code below.</p>
+                <div style="display: flex; align-items: center; margin: 1rem 0 0.5rem;">
+                    <span style="color: #e37734; font-weight: 600;"><i class="fab fa-rust"></i> lib.rs</span>
+                    <span class="source-label">ledger.wasm — bank engine</span>
+                </div>
+                <pre class="source-code-block"><span class="keyword">use</span> wasm_bindgen::prelude::*;
+
+<span class="keyword">#[wasm_bindgen]</span>
+<span class="keyword">#[derive(Debug, Clone)]</span>
+<span class="keyword">pub enum</span> <span class="type">TransactionType</span> {
+    Open,
+    Deposit,
+    Withdrawal,
+}
+
+<span class="keyword">#[wasm_bindgen]</span>
+<span class="keyword">pub struct</span> <span class="type">BankAccount</span> {
+    balance: <span class="type">i32</span>,
+    history: <span class="type">Vec</span>&lt;Transaction&gt;,
+}
+
+<span class="keyword">#[wasm_bindgen]</span>
+<span class="keyword">impl</span> <span class="type">BankAccount</span> {
+    <span class="keyword">pub fn</span> <span class="func">new</span>(starting_balance: <span class="type">i32</span>) -> <span class="type">BankAccount</span> { <span class="comment">/* ... */</span> }
+    <span class="keyword">pub fn</span> <span class="func">deposit</span>(&amp;<span class="keyword">mut self</span>, amount: <span class="type">i32</span>, memo: &amp;<span class="type">str</span>) -> <span class="type">String</span> { <span class="comment">/* ... */</span> }
+    <span class="keyword">pub fn</span> <span class="func">withdraw</span>(&amp;<span class="keyword">mut self</span>, amount: <span class="type">i32</span>, memo: &amp;<span class="type">str</span>) -> <span class="type">String</span> { <span class="comment">/* ... */</span> }
+    <span class="keyword">pub fn</span> <span class="func">generate_statement</span>(&amp;<span class="keyword">self</span>) -> <span class="type">String</span> { <span class="comment">/* ... */</span> }
+}</pre>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Statement Modal -->
+    <div class="statement-overlay" id="stmt-overlay" onclick="closeStatement(event)">
+        <div class="statement-modal" onclick="event.stopPropagation()">
+            <h3><i class="fas fa-file-invoice-dollar" style="color: var(--accent-primary);"></i> Bank Statement</h3>
+            <pre id="stmt-content"></pre>
+            <div class="statement-actions">
+                <button class="btn-statement btn-close-stmt" onclick="closeStatement()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <div class="footer-buttons">
+                    <a href="assets/Saikiran_Resume.pdf" download class="btn btn-secondary"><i class="fas fa-download"></i> Download Resume</a>
+                    <div class="footer-buttons-row">
+                        <a href="mailto:bjsaikiran@gmail.com" class="email-link"><i class="fas fa-envelope"></i> bjsaikiran@gmail.com</a>
+                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email" aria-label="Copy email address"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
+                    </div>
+                </div>
+                <p class="contact-divider">Or Contact me from here</p>
+                <form id="contact-form" action="https://formspree.io/f/mlgwagkl" method="POST" class="contact-form">
+                    <div class="form-group">
+                        <label for="contact-name">Name</label>
+                        <input type="text" id="contact-name" name="name" required autocomplete="name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email">Email</label>
+                        <input type="email" id="contact-email" name="email" required autocomplete="email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message">Message</label>
+                        <textarea id="contact-message" name="message" required placeholder="What's on your mind?"></textarea>
+                    </div>
+                    <button type="submit" class="form-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
+                    <div class="form-status" aria-live="polite"></div>
+                </form>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon" aria-label="GitHub profile"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon" aria-label="LinkedIn profile"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Saikiran. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+    <script type="module">
+        import init, { BankAccount } from './assets/wasm/ledger/ledger.js';
+
+        let account = null;
+        let wasmReady = false;
+        const transactions = []; // Local mirror for UI rendering
+
+        async function initWasm() {
+            await init();
+            account = new BankAccount(10000); // $100.00 starting balance
+            wasmReady = true;
+            transactions.push({ type: 'open', amount: 10000, memo: 'Initial Opening' });
+            updateUI();
+        }
+
+        function updateUI() {
+            // Balance
+            const bal = account.get_balance();
+            document.getElementById('balance-display').textContent = '$' + (bal / 100).toFixed(2);
+            document.getElementById('txn-count').textContent = account.get_transaction_count();
+
+            // Transaction list
+            const list = document.getElementById('txn-list');
+            if (transactions.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">No transactions yet.</p>';
+                return;
+            }
+            list.innerHTML = transactions.slice().reverse().map(txn => {
+                const iconClass = txn.type === 'deposit' ? 'deposit' : txn.type === 'withdraw' ? 'withdraw' : 'open';
+                const icon = txn.type === 'deposit' ? 'fa-arrow-down' : txn.type === 'withdraw' ? 'fa-arrow-up' : 'fa-university';
+                const amtClass = txn.type === 'deposit' ? 'positive' : txn.type === 'withdraw' ? 'negative' : 'neutral';
+                const sign = txn.type === 'withdraw' ? '-' : '+';
+                const label = txn.type.charAt(0).toUpperCase() + txn.type.slice(1);
+                return `<div class="txn-item">
+                    <div class="txn-icon ${iconClass}"><i class="fas ${icon}"></i></div>
+                    <div class="txn-details">
+                        <div class="txn-memo">${escapeHtml(txn.memo)}</div>
+                        <div class="txn-type">${label}</div>
+                    </div>
+                    <div class="txn-amount ${amtClass}">${sign}$${(txn.amount / 100).toFixed(2)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        window.setAmount = function(val) {
+            document.getElementById('txn-amount').value = val.toFixed(2);
+        };
+
+        window.doDeposit = function() {
+            if (!wasmReady) return;
+            const amountInput = document.getElementById('txn-amount');
+            const memoInput = document.getElementById('txn-memo');
+            const dollars = parseFloat(amountInput.value);
+            if (isNaN(dollars) || dollars <= 0) {
+                showToast('Enter a valid amount', 'error');
+                return;
+            }
+            const cents = Math.round(dollars * 100);
+            const memo = memoInput.value.trim() || 'Deposit';
+            const result = account.deposit(cents, memo);
+
+            if (result.startsWith('ERROR')) {
+                showToast(result, 'error');
+            } else {
+                transactions.push({ type: 'deposit', amount: cents, memo });
+                showToast(`Deposited $${dollars.toFixed(2)}`, 'success');
+                amountInput.value = '';
+                memoInput.value = '';
+                updateUI();
+            }
+        };
+
+        window.doWithdraw = function() {
+            if (!wasmReady) return;
+            const amountInput = document.getElementById('txn-amount');
+            const memoInput = document.getElementById('txn-memo');
+            const dollars = parseFloat(amountInput.value);
+            if (isNaN(dollars) || dollars <= 0) {
+                showToast('Enter a valid amount', 'error');
+                return;
+            }
+            const cents = Math.round(dollars * 100);
+            const memo = memoInput.value.trim() || 'Withdrawal';
+            const result = account.withdraw(cents, memo);
+
+            if (result.startsWith('ERROR')) {
+                showToast(result, 'error');
+            } else {
+                transactions.push({ type: 'withdraw', amount: cents, memo });
+                showToast(`Withdrew $${dollars.toFixed(2)}`, 'success');
+                amountInput.value = '';
+                memoInput.value = '';
+                updateUI();
+            }
+        };
+
+        window.showStatement = function() {
+            if (!wasmReady) return;
+            document.getElementById('stmt-content').textContent = account.generate_statement();
+            document.getElementById('stmt-overlay').classList.add('show');
+        };
+
+        window.closeStatement = function(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('stmt-overlay').classList.remove('show');
+        };
+
+        window.resetAccount = function() {
+            if (!wasmReady) return;
+            account = new BankAccount(10000);
+            transactions.length = 0;
+            transactions.push({ type: 'open', amount: 10000, memo: 'Initial Opening' });
+            updateUI();
+            showToast('Account reset to $100.00', 'success');
+        };
+
+        // Handle Enter key in inputs
+        document.getElementById('txn-amount').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') window.doDeposit();
+        });
+        document.getElementById('txn-memo').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') window.doDeposit();
+        });
+
+        initWasm();
+    </script>
+
+</body>
+
+</html>
