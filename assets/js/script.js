@@ -1,5 +1,21 @@
 // assets/js/script.js
 
+// ── Analytics (GoatCounter — inline to avoid ad-blocker blocking) ─────────
+(function() {
+    if (localStorage.getItem('_gc') === location.pathname) return;
+    try {
+        var img = new Image();
+        img.src = 'https://saikiran2001-v2.goatcounter.com/count?p=' +
+            encodeURIComponent(location.pathname) +
+            '&t=' + encodeURIComponent(document.title) +
+            '&r=' + encodeURIComponent(document.referrer || '') +
+            '&s=' + encodeURIComponent(screen.width + ',' + screen.height + ',' + (devicePixelRatio || 1)) +
+            '&rnd=' + Math.random().toString(36).slice(2);
+        localStorage.setItem('_gc', location.pathname);
+        setTimeout(function() { localStorage.removeItem('_gc'); }, 8000);
+    } catch(e) {}
+})();
+
 function copyEmail(btn) {
     navigator.clipboard.writeText('bjsaikiran@gmail.com').then(function() {
         var tooltip = btn.querySelector('.copy-tooltip');
@@ -169,7 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Failed');
                 }
             } catch {
-                status.textContent = 'Oops — something went wrong. Try emailing me directly.';
+                status.innerHTML = 'Blocked by your browser. <a href="mailto:bjsaikiran@gmail.com?subject=' +
+                    encodeURIComponent('Contact from portfolio') + '" style="color:var(--accent-primary);text-decoration:underline;">Email me directly</a> instead.';
                 status.classList.add('error');
             } finally {
                 btn.disabled = false;
