@@ -353,63 +353,70 @@
 
         /* Statement modal */
         .statement-overlay {
+            display: none;
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            backdrop-filter: blur(8px);
             z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
         }
 
         .statement-overlay.show {
-            opacity: 1;
-            visibility: visible;
+            display: flex;
         }
 
-        .statement-modal {
-            background: var(--surface-color);
-            border: 1px solid var(--surface-border);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 550px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+        .statement-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
         }
 
-        .statement-modal h3 {
-            margin-bottom: 1rem;
+        .statement-header {
+            background: #2d2d2d;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #333;
         }
 
-        .statement-modal pre {
+        .statement-body {
+            padding: 1.5rem;
             font-family: 'JetBrains Mono', monospace;
+            color: #22c55e;
             font-size: 0.85rem;
             white-space: pre-wrap;
             word-break: break-word;
-            color: #22c55e;
+            max-height: 60vh;
+            overflow-y: auto;
             background: rgba(0, 0, 0, 0.3);
-            padding: 1rem;
-            border-radius: 10px;
             line-height: 1.6;
         }
 
         .statement-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #333;
             display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            gap: 0.8rem;
         }
 
-        .btn-statement {
-            padding: 0.6rem 1.25rem;
+        .statement-actions button {
+            flex: 1;
+            padding: 0.6rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
+            font-family: var(--font-body);
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -617,12 +624,17 @@
     </main>
 
     <!-- Statement Modal -->
-    <div class="statement-overlay" id="stmt-overlay" onclick="closeStatement(event)">
-        <div class="statement-modal" onclick="event.stopPropagation()">
-            <h3><i class="fas fa-file-invoice-dollar" style="color: var(--accent-primary);"></i> Bank Statement</h3>
-            <pre id="stmt-content"></pre>
+    <div class="statement-overlay" id="stmt-overlay" onclick="closeStatement()">
+        <div class="statement-card" onclick="event.stopPropagation()">
+            <div class="statement-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span style="color: #999; font-size: 0.85rem; margin-left: 0.5rem;">ledger.wasm — statement</span>
+            </div>
+            <div class="statement-body" id="stmt-content"></div>
             <div class="statement-actions">
-                <button class="btn-statement btn-close-stmt" onclick="closeStatement()">Close</button>
+                <button class="btn-close-stmt" onclick="closeStatement()">Close</button>
             </div>
         </div>
     </div>
@@ -788,8 +800,7 @@
             document.getElementById('stmt-overlay').classList.add('show');
         };
 
-        window.closeStatement = function(e) {
-            if (e && e.target !== e.currentTarget) return;
+        window.closeStatement = function() {
             document.getElementById('stmt-overlay').classList.remove('show');
         };
 
