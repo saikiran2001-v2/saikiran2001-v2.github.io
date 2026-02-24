@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixing Deep Sleep on Snapdragon X Elite — Three Wake Sources, Five Patches | Saikiran</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <meta name="description" content="How I tracked down and fixed three independent spurious wakeup sources preventing s2idle deep sleep on the Lenovo Yoga Slim 7x: charger GLINK interrupts, I2C HID dummy regulators, and keyboard LED drain.">
+    <meta property="og:title" content="Fixing Deep Sleep on Snapdragon X Elite">
+    <meta property="og:description" content="Three independent spurious wakeup sources preventing s2idle on the Lenovo Yoga Slim 7x — and the five patches that fix them.">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="assets/favicon.svg">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .post-hero {
+            padding: 120px 0 40px;
+        }
+
+        .post-container {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-sm) var(--spacing-xl);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .post-meta .date {
+            font-size: 0.9rem;
+        }
+
+        .post-meta .read-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .post-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .post-back:hover {
+            gap: 0.8rem;
+        }
+
+        .post-title {
+            font-size: 2.4rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .post-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .post-body h2 {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 0.8rem;
+            color: var(--text-main);
+        }
+
+        .post-body h3 {
+            font-size: 1.15rem;
+            margin: 2rem 0 0.6rem;
+            color: var(--accent-primary);
+        }
+
+        .post-body p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1.2rem;
+        }
+
+        .post-body strong {
+            color: var(--text-main);
+        }
+
+        .post-body a {
+            color: var(--accent-primary);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .post-body a:hover {
+            color: var(--accent-secondary);
+        }
+
+        .post-body ul, .post-body ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .post-body li {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 0.4rem;
+        }
+
+        .post-body pre {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid #333;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #abb2bf;
+        }
+
+        .post-body code {
+            font-family: var(--font-mono);
+            font-size: 0.88em;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+            padding: 0.1em 0.4em;
+            color: var(--accent-primary);
+        }
+
+        .post-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            font-size: inherit;
+        }
+
+        .post-body blockquote {
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.8rem 1.5rem;
+            margin: 1.5rem 0;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .post-body blockquote p {
+            margin-bottom: 0;
+            font-style: italic;
+        }
+
+        .callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .callout i {
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+        }
+
+        .callout-green {
+            background: rgba(34, 197, 94, 0.08);
+            border-color: rgba(34, 197, 94, 0.25);
+        }
+
+        .callout-green i {
+            color: #22c55e;
+        }
+
+        .callout-yellow {
+            background: rgba(251, 191, 36, 0.08);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+
+        .callout-yellow i {
+            color: #fbbf24;
+        }
+
+        .wake-source-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .wake-source-card h4 {
+            font-size: 1.05rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .wake-source-card h4 .ws-num {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .wake-source-card p {
+            margin-bottom: 0.6rem;
+        }
+
+        .ws-symptom {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            margin: 0.8rem 0;
+            color: #ef4444;
+        }
+
+        .ws-fix {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            margin: 0.8rem 0;
+            color: #22c55e;
+        }
+
+        .patch-file {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-secondary);
+            display: block;
+            margin-top: 0.4rem;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0.5rem;
+            align-items: center;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .flow-box {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            color: var(--accent-primary);
+            font-size: 1.2rem;
+        }
+
+        [data-theme="light"] .post-body pre {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #334155;
+        }
+
+        @media (max-width: 768px) {
+            .post-title { font-size: 1.8rem; }
+            .flow-diagram { grid-template-columns: 1fr; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html" class="active">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <!-- Theme Toggle -->
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="post-hero">
+        <div class="post-container">
+
+            <a href="blog.html" class="post-back"><i class="fas fa-arrow-left"></i> Back to Blog</a>
+
+            <div class="tags" style="margin-bottom: 1.2rem;">
+                <span class="tag">Linux Kernel</span>
+                <span class="tag">Power Management</span>
+                <span class="tag">s2idle</span>
+                <span class="tag">Snapdragon X Elite</span>
+            </div>
+
+            <h1 class="post-title">Fixing Deep Sleep on Snapdragon X Elite — Three Wake Sources, Five Patches</h1>
+            <p class="post-subtitle">
+                The Lenovo Yoga Slim 7x refuses to stay asleep. Close the lid, it wakes within seconds — especially
+                with a charger plugged in. The problem isn't one bug. It's three independent wake sources across three
+                different subsystems, each one capable of pulling the system out of s2idle on its own.
+            </p>
+
+            <div class="post-meta">
+                <span class="date"><i class="fas fa-calendar-alt" style="margin-right:0.3rem;"></i> February 2026</span>
+                <span class="read-time"><i class="fas fa-clock" style="margin-right:0.3rem;"></i> ~10 min read</span>
+                <span style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:50px;padding:0.2rem 0.8rem;font-size:0.8rem;color:#22c55e;font-weight:600;"><i class="fas fa-circle-check"></i> All fixes working locally</span>
+            </div>
+
+            <div style="background:var(--surface-color);border:1px solid var(--surface-border);border-radius:12px;padding:1rem 1.4rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;">
+                <i class="fab fa-github" style="color:var(--accent-secondary);font-size:1.2rem;flex-shrink:0;"></i>
+                <div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.15rem;">Patch branch</div>
+                    <a href="https://github.com/saikiran2001-v2/linux-Slim7x-Patches/tree/deepsleep"
+                       target="_blank" rel="noopener" style="font-weight:600;font-size:0.9rem;color:var(--accent-primary);text-decoration:underline;text-underline-offset:3px;">
+                        saikiran2001-v2/linux-Slim7x-Patches @ deepsleep <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="post-body">
+
+                <h2>The Problem</h2>
+                <p>
+                    On the Lenovo Yoga Slim 7x (Snapdragon X Elite, X1E80100), closing the lid and expecting
+                    the machine to sleep is optimistic. The system uses <strong>s2idle</strong> (suspend-to-idle) —
+                    the only suspend mode available on this platform. In theory, the CPUs go into
+                    deep idle states, peripherals power down, and the system draws minimal current.
+                </p>
+                <p>
+                    In practice, the system wakes within seconds. Sometimes immediately. Plugging in a charger
+                    makes it worse — nearly guaranteed instant wakeup. Leave it "suspended" in a bag overnight
+                    and you'll find it warm, the battery drained, and the keyboard backlight still glowing.
+                </p>
+                <p>
+                    The frustrating part: there isn't one bug. There are three independent wake sources, each in
+                    a different subsystem, each sufficient on its own to prevent sleep. Fixing two out of three
+                    still results in a machine that won't stay asleep.
+                </p>
+
+                <h2>The Three Wake Sources</h2>
+
+                <div class="wake-source-card">
+                    <h4><span class="ws-num">1</span> Charger GLINK Interrupts</h4>
+                    <p>
+                        When a charger is connected, the PMIC sends a continuous stream of messages via
+                        <strong>GLINK</strong> (Qualcomm's inter-processor communication channel) — battery
+                        status updates, UCSI notifications, and Type-C events. Each message arrives as an
+                        interrupt on the <code>apps_rsc</code>, which pulls the system out of s2idle
+                        immediately.
+                    </p>
+                    <div class="ws-symptom">Symptom: System wakes within 1-2s of suspend when charger is connected</div>
+                    <p>
+                        <strong>Fix:</strong> Add suspend/resume callbacks to the <code>pmic_glink</code> driver.
+                        A <code>suspended</code> flag is set during suspend, and the RPMsg callback
+                        unconditionally drops all incoming messages while the flag is set — effectively
+                        masking these wake sources at the driver level.
+                    </p>
+<pre><code>static int pmic_glink_rpmsg_callback(struct rpmsg_device *rpdev,
+                                     void *data, int len,
+                                     void *priv, u32 addr)
+{
+    struct pmic_glink *pg = dev_get_drvdata(&rpdev->dev);
+
+    /* Drop all messages during suspend */
+    if (pg->suspended) {
+        dev_dbg(pg->dev, "Dropping message during suspend\n");
+        return 0;
+    }
+    ...
+}</code></pre>
+                    <span class="patch-file">→ 0001-soc-qcom-pmic_glink-suspend-charger-updates-to-preve.patch</span>
+                </div>
+
+                <div class="wake-source-card">
+                    <h4><span class="ws-num">2</span> I2C HID Dummy Regulators</h4>
+                    <p>
+                        The touchpad (<code>@2c</code>), keyboard (<code>@3a</code>), and touchscreen
+                        (<code>@14</code>) are I2C HID devices. Their Device Tree nodes were missing
+                        <code>vdd-supply</code> and <code>vddl-supply</code> properties, so the kernel
+                        fell back to <strong>dummy regulators</strong>:
+                    </p>
+<pre><code>i2c-hid-of 4-002c: supply vdd not found, using dummy regulator
+i2c-hid-of 4-003a: supply vddl not found, using dummy regulator</code></pre>
+                    <p>
+                        Without real regulator backing, the kernel couldn't properly power-manage these devices
+                        during suspend. This caused <strong>IRQ affinity failures</strong> (<code>-EINVAL</code>)
+                        when CPUs went offline during the suspend path — the IRQ migration logic broke
+                        because the devices couldn't be put into a low-power state, and the resulting errors
+                        triggered spurious wakeups.
+                    </p>
+                    <p>
+                        <strong>Fix:</strong> Add real regulator supplies to the DTS nodes:
+                    </p>
+<pre><code>touchpad@2c {
+    compatible = "hid-over-i2c";
+    reg = <0x2c>;
++   vdd-supply = <&vreg_l8b_3p0>;
++   vddl-supply = <&vreg_l15b_1p8>;
+    ...
+};
+
+keyboard@3a {
+    ...
++   vdd-supply = <&vreg_l8b_3p0>;
++   vddl-supply = <&vreg_l15b_1p8>;
+};
+
+touchscreen@14 {
+    ...
++   vdd-supply = <&vreg_l8b_3p0>;
++   vddl-supply = <&vreg_l15b_1p8>;
+};</code></pre>
+                    <span class="patch-file">→ 0002-dt-x1e-add-vdd-vddl-supplies-to-I2C-HID-nodes.patch</span>
+                </div>
+
+                <div class="wake-source-card">
+                    <h4><span class="ws-num">3</span> Keyboard LEDs &amp; EC Suspend Notification</h4>
+                    <p>
+                        Two related problems. First, the mute/micmute LEDs and keyboard backlight stay on during
+                        suspend, drawing <strong>100–500mW</strong> continuously. Second, the Embedded Controller
+                        (EC) was never being told that the system is suspending — it continued operating as if the
+                        system were awake, which prevented it from entering its own low-power state and triggering
+                        keyboard backlight timeout.
+                    </p>
+                    <p>
+                        This is fixed by three patches across two drivers:
+                    </p>
+                    <p>
+                        <strong>hid-lenovo driver:</strong> Add PM suspend/resume callbacks that save mute/micmute
+                        LED brightness, turn them off on suspend, and restore on resume.
+                    </p>
+<pre><code>static int lenovo_suspend(struct hid_device *hdev, pm_message_t message)
+{
+    struct lenovo_drvdata *data = hid_get_drvdata(hdev);
+
+    /* Save and turn off LEDs */
+    data->saved_led_mute_brightness = data->led_mute.brightness;
+    data->saved_led_micmute_brightness = data->led_micmute.brightness;
+    lenovo_led_brightness_set(&data->led_mute, LED_OFF);
+    lenovo_led_brightness_set(&data->led_micmute, LED_OFF);
+    return 0;
+}</code></pre>
+                    <span class="patch-file">→ 0001-HID-lenovo-Add-suspend-resume-to-turn-off-LEDs-durin.patch</span>
+
+                    <p style="margin-top:1.2rem;">
+                        <strong>EC platform driver:</strong> A complete I2C driver for the Yoga Slim 7x's Embedded
+                        Controller (originally by Maya Matuszczyk, extended with PM support). On suspend, it writes
+                        <code>EC_NOTIFY_SCREEN_OFF</code> + <code>EC_NOTIFY_SUSPEND_ENTER</code> to the EC's
+                        suspend register. On resume, it sends <code>EC_NOTIFY_SUSPEND_EXIT</code> +
+                        <code>EC_NOTIFY_SCREEN_ON</code>. The driver also saves and restores keyboard
+                        backlight brightness across the suspend cycle and handles the Fn+Space
+                        backlight toggle key.
+                    </p>
+<pre><code>/* EC register map (SMBus) */
+#define EC_SUSPEND_RESUME_REG     0x23
+#define EC_BACKLIGHT_STATUS_REG   0x83
+
+/* Suspend: save backlight → turn off → notify EC */
+ec->saved_kbd_backlight = i2c_smbus_read_byte_data(client, 0x83);
+i2c_smbus_write_byte_data(client, EC_BACKLIGHT_STATUS_REG, 0x00);
+i2c_smbus_write_byte_data(client, EC_SUSPEND_RESUME_REG, EC_NOTIFY_SCREEN_OFF);
+i2c_smbus_write_byte_data(client, EC_SUSPEND_RESUME_REG, EC_NOTIFY_SUSPEND_ENTER);</code></pre>
+                    <span class="patch-file">→ 0002-UBUNTU-SAUCE-platform-arm64-Add-driver-for-Lenovo-Yo.patch</span><br>
+                    <span class="patch-file">→ 0003-platform-arm64-lenovo-yoga-slim7x-Add-keyboard-backl.patch</span>
+                </div>
+
+                <h2>Why All Three Matter</h2>
+                <p>
+                    Each wake source is independently sufficient to break suspend. In testing:
+                </p>
+                <ul>
+                    <li>Fix GLINK alone → still wakes from IRQ affinity failures</li>
+                    <li>Fix GLINK + I2C HID → LEDs still drain battery, EC thinks system is awake</li>
+                    <li>Fix all three → <strong>stable s2idle, minimal battery drain, clean resume</strong></li>
+                </ul>
+
+                <div class="callout callout-green">
+                    <i class="fas fa-check-circle"></i>
+                    <p>
+                        <strong>Result:</strong> With all five patches applied on kernel 7.0-rc1, the Yoga Slim 7x
+                        enters and stays in s2idle reliably — charger connected or not.
+                        Keyboard backlight and LEDs go dark on suspend. Battery drain drops to expected idle
+                        levels. Resume is clean with no hardware timeouts.
+                    </p>
+                </div>
+
+                <h2>The Patch Summary</h2>
+
+                <table style="width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--surface-border);text-align:left;">
+                            <th style="padding:0.6rem 0.8rem;color:var(--text-main);">Patch</th>
+                            <th style="padding:0.6rem 0.8rem;color:var(--text-main);">Subsystem</th>
+                            <th style="padding:0.6rem 0.8rem;color:var(--text-main);">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody style="color:var(--text-muted);">
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:0.6rem 0.8rem;font-family:var(--font-mono);font-size:0.8rem;">0001-soc-qcom-pmic_glink</td>
+                            <td style="padding:0.6rem 0.8rem;">soc/qcom</td>
+                            <td style="padding:0.6rem 0.8rem;">Drop GLINK messages during suspend</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:0.6rem 0.8rem;font-family:var(--font-mono);font-size:0.8rem;">0002-dt-x1e</td>
+                            <td style="padding:0.6rem 0.8rem;">devicetree</td>
+                            <td style="padding:0.6rem 0.8rem;">Add vdd/vddl regulator supplies to I2C HID nodes</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:0.6rem 0.8rem;font-family:var(--font-mono);font-size:0.8rem;">0001-HID-lenovo</td>
+                            <td style="padding:0.6rem 0.8rem;">hid</td>
+                            <td style="padding:0.6rem 0.8rem;">Save/restore mute LEDs across suspend, turn off during sleep</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--surface-border);">
+                            <td style="padding:0.6rem 0.8rem;font-family:var(--font-mono);font-size:0.8rem;">0002-UBUNTU-SAUCE</td>
+                            <td style="padding:0.6rem 0.8rem;">platform/arm64</td>
+                            <td style="padding:0.6rem 0.8rem;">EC driver — suspend/resume notifications, mic-mute input</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:0.6rem 0.8rem;font-family:var(--font-mono);font-size:0.8rem;">0003-platform-arm64</td>
+                            <td style="padding:0.6rem 0.8rem;">platform/arm64</td>
+                            <td style="padding:0.6rem 0.8rem;">EC keyboard backlight save/restore + Fn+Space handling</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Debugging Methodology</h2>
+
+                <h3>Identifying wake sources</h3>
+                <p>
+                    The primary tool was <code>/sys/kernel/debug/wakeup_sources</code> combined with
+                    targeted <code>dev_dbg</code> / <code>dev_info</code> prints. The general approach:
+                </p>
+                <ol>
+                    <li>Attempt suspend, observe immediate wakeup</li>
+                    <li>Check <code>dmesg</code> for the wakeup IRQ — which device, which interrupt line</li>
+                    <li>Trace backward from the IRQ to the driver that services it</li>
+                    <li>Add the suspend fix for that specific source</li>
+                    <li>Rebuild, flash, retry — if it still wakes immediately, there's another source</li>
+                    <li>Repeat until suspend actually holds</li>
+                </ol>
+                <p>
+                    The charger GLINK source was the most obvious — it only triggers with a charger connected.
+                    The I2C HID dummy regulator issue was identified by the <code>-EINVAL</code> IRQ
+                    affinity errors in <code>dmesg</code> during the CPU offline phase.
+                </p>
+
+                <h3>The EC driver story</h3>
+                <p>
+                    The EC driver is based on Maya Matuszczyk's original work from the Ubuntu kernel
+                    (bug <a href="https://bugs.launchpad.net/bugs/2100858" target="_blank" rel="noopener">#2100858</a>).
+                    The original driver handled the mic-mute button and basic suspend/resume notifications.
+                    I extended it with keyboard backlight save/restore, the Fn+Space key event,
+                    fixed a missing <code>i2c_set_clientdata()</code> that was needed for PM callbacks
+                    to find the driver data, and changed the unhandled IRQ log level from
+                    <code>dev_info</code> to <code>dev_dbg</code> to reduce log noise.
+                </p>
+
+                <div class="callout callout-yellow">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <p>
+                        <strong>Upstream status:</strong> These patches are currently local/community fixes.
+                        The EC driver (originally UBUNTU: SAUCE) and the platform-specific DTS changes are
+                        candidates for upstreaming, but the PMIC GLINK change (dropping messages unconditionally
+                        during suspend) may need a more refined approach — ideally filtering by message
+                        type rather than dropping everything.
+                    </p>
+                </div>
+
+                <h2>Takeaways</h2>
+                <ul>
+                    <li><strong>s2idle is only as good as its weakest wake source.</strong> One unmasked
+                        interrupt from any subsystem is enough to break the entire sleep. On new ARM
+                        platforms with many independently-controlled peripherals, expect multiple sources.</li>
+                    <li><strong>Dummy regulators hide real bugs.</strong> The <code>supply vdd not found, using
+                        dummy regulator</code> warning is easy to ignore — it looks harmless. But it means the
+                        kernel can't control power rails, which means it can't properly power-manage the
+                        device in suspend. Missing DTS regulator bindings are a category of bug, not a debug
+                        convenience.</li>
+                    <li><strong>Tell the EC you're suspending.</strong> Embedded controllers on Lenovo machines
+                        won't automatically detect system sleep. Without explicit suspend/resume register
+                        writes, the EC continues running backlight timers and interrupt handling as if the
+                        system were awake.</li>
+                    <li><strong>LED power is not negligible.</strong> Mute/micmute LEDs and keyboard backlight
+                        sustained during suspend draw 100–500mW. Over an 8-hour "sleep," that's 0.8–4 Wh of
+                        wasted battery, plus the thermal contribution in a closed bag.</li>
+                </ul>
+
+            </div><!-- /.post-body -->
+
+            <!-- Author / Back -->
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--surface-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <p style="font-weight:700; margin-bottom:0.2rem;">Jaya Saikiran Banigallapati</p>
+                    <p style="color: var(--text-muted); font-size:0.9rem;">Linux Kernel Contributor &amp; Power Platform Developer</p>
+                </div>
+                <a href="blog.html" class="btn btn-secondary" style="margin-left:0;">
+                    <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i> All Posts
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <div class="footer-buttons">
+                    <div class="footer-buttons-row">
+                        <a href="mailto:bjsaikiran@gmail.com" class="email-link"><i class="fas fa-envelope"></i> bjsaikiran@gmail.com</a>
+                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email" aria-label="Copy email address"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
+                    </div>
+                    <a href="assets/Saikiran_Resume.pdf" download class="btn btn-secondary"><i class="fas fa-download"></i> Download Resume</a>
+                </div>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon" aria-label="GitHub profile"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon" aria-label="LinkedIn profile"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Jaya Saikiran Banigallapati. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+</body>
+
+</html>

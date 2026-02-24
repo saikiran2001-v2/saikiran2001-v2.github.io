@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debugging a Camera Brownout on Snapdragon X Elite — OV02C10 &amp; the Passive Discharge Problem | Saikiran</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <meta name="description" content="How I root-caused an OV02C10 camera initialization failure on the Lenovo Yoga Slim 7x to a PMIC rail brownout during rapid power cycling, developed a 6-patch local fix, and hit an upstream wall.">
+    <meta property="og:title" content="Debugging a Camera Brownout on Snapdragon X Elite">
+    <meta property="og:description" content="How I root-caused an OV02C10 camera initialization failure on the Lenovo Yoga Slim 7x to a PMIC rail brownout during rapid power cycling, developed a 6-patch local fix, and hit an upstream wall.">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="assets/favicon.svg">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .post-hero {
+            padding: 120px 0 40px;
+        }
+
+        .post-container {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-sm) var(--spacing-xl);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .post-meta .date {
+            font-size: 0.9rem;
+        }
+
+        .post-meta .read-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .post-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .post-back:hover {
+            gap: 0.8rem;
+        }
+
+        .post-title {
+            font-size: 2.4rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .post-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .post-body h2 {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 0.8rem;
+            color: var(--text-main);
+        }
+
+        .post-body h3 {
+            font-size: 1.15rem;
+            margin: 2rem 0 0.6rem;
+            color: var(--accent-primary);
+        }
+
+        .post-body p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1.2rem;
+        }
+
+        .post-body strong {
+            color: var(--text-main);
+        }
+
+        .post-body a {
+            color: var(--accent-primary);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .post-body a:hover {
+            color: var(--accent-secondary);
+        }
+
+        .post-body ul, .post-body ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .post-body li {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 0.4rem;
+        }
+
+        .post-body pre {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid #333;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #abb2bf;
+        }
+
+        .post-body code {
+            font-family: var(--font-mono);
+            font-size: 0.88em;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+            padding: 0.1em 0.4em;
+            color: var(--accent-primary);
+        }
+
+        .post-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            font-size: inherit;
+        }
+
+        .post-body blockquote {
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.8rem 1.5rem;
+            margin: 1.5rem 0;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .post-body blockquote p {
+            margin-bottom: 0;
+            font-style: italic;
+        }
+
+        .callout {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .callout i {
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+        }
+
+        .lore-link {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1rem 1.4rem;
+            margin: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lore-link i {
+            color: var(--accent-secondary);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .lore-link .lore-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.15rem;
+        }
+
+        .lore-link a {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .patch-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.6rem 1.2rem;
+            margin: 1.2rem 0;
+        }
+
+        .patch-num {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-secondary);
+            font-weight: 700;
+            padding-top: 0.15rem;
+            white-space: nowrap;
+        }
+
+        .patch-desc {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .attempt-list {
+            counter-reset: attempt;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .attempt-list li {
+            counter-increment: attempt;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            position: relative;
+            border-left: 2px solid var(--surface-border);
+            margin-bottom: 0.6rem;
+            border-radius: 0 8px 8px 0;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .attempt-list li::before {
+            content: counter(attempt);
+            position: absolute;
+            left: 0.8rem;
+            top: 0.85rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            background: rgba(59,130,246,0.1);
+            border-radius: 4px;
+            padding: 0.05rem 0.35rem;
+        }
+
+        .attempt-list li.rejected { border-left-color: #ef4444; }
+        .attempt-list li.partial  { border-left-color: #fbbf24; }
+        .attempt-list li.current  { border-left-color: #22c55e; }
+        .attempt-list li.open     { border-left-color: var(--accent-secondary); }
+
+        .outcome-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.1rem 0.5rem;
+            border-radius: 50px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .badge-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .badge-works    { background: rgba(34,197,94,0.15);  color: #22c55e; }
+        .badge-partial  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .badge-withdrawn { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .badge-open     { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+        [data-theme="light"] .post-body pre {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #334155;
+        }
+
+        @media (max-width: 768px) {
+            .post-title { font-size: 1.8rem; }
+            .patch-grid { grid-template-columns: 1fr; }
+            .patch-num { padding-top: 0; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html" class="active">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <!-- Theme Toggle -->
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="post-hero">
+        <div class="post-container">
+
+            <a href="blog.html" class="post-back"><i class="fas fa-arrow-left"></i> Back to Blog</a>
+
+            <div class="tags" style="margin-bottom: 1.2rem;">
+                <span class="tag">Linux Kernel</span>
+                <span class="tag">V4L2 / Media</span>
+                <span class="tag">PMIC / Regulator</span>
+                <span class="tag">Snapdragon X Elite</span>
+                <span class="tag">Power Management</span>
+            </div>
+
+            <h1 class="post-title">Debugging a Camera Brownout on Snapdragon X Elite — OV02C10 &amp; the Passive Discharge Problem</h1>
+            <p class="post-subtitle">
+                The camera on the Lenovo Yoga Slim 7x works on first open — but fails silently on any rapid
+                open/close cycle. The I2C chip ID reads fine. The CSI-2 streaming block doesn't start.
+                The culprit is a PMIC rail that takes 2.3 seconds to discharge, and a kernel that doesn't know to wait.
+            </p>
+
+            <div class="post-meta">
+                <span class="date"><i class="fas fa-calendar-alt" style="margin-right:0.3rem;"></i> February 2026</span>
+                <span class="read-time"><i class="fas fa-clock" style="margin-right:0.3rem;"></i> ~12 min read</span>
+                <span style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:50px;padding:0.2rem 0.8rem;font-size:0.8rem;color:#fbbf24;font-weight:600;"><i class="fas fa-circle-half-stroke"></i> Local fix working — upstream withdrawn</span>
+            </div>
+
+            <div class="lore-link">
+                <i class="fas fa-envelope-open-text"></i>
+                <div>
+                    <div class="lore-label">Upstream thread — media subsystem</div>
+                    <a href="https://lore.kernel.org/linux-media/20260127165024.46156-1-bjsaikiran@gmail.com/T/#t"
+                       target="_blank" rel="noopener">
+                        lore.kernel.org/linux-media/20260127165024… <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="lore-link">
+                <i class="fas fa-envelope-open-text"></i>
+                <div>
+                    <div class="lore-label">Upstream thread — regulator subsystem</div>
+                    <a href="https://lore.kernel.org/all/20260127173736.82976-1-bjsaikiran@gmail.com/"
+                       target="_blank" rel="noopener">
+                        lore.kernel.org/all/20260127173736… <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="post-body">
+
+                <h2>The Setup</h2>
+                <p>Hardware involved:</p>
+                <ul>
+                    <li><strong>Device:</strong> Lenovo Yoga Slim 7x — Snapdragon X Elite X1E80100</li>
+                    <li><strong>Sensor:</strong> OmniVision OV02C10 (front camera)</li>
+                    <li><strong>PMIC:</strong> Qualcomm PM8550 / PMK8550 — rails managed by <code>qcom-rpmh-regulator</code></li>
+                    <li><strong>Camera rails:</strong> AVDD 2.8V (<code>ldo7</code>), DVDD 1.2V (<code>ldo1</code>), DOVDD 1.8V (<code>ldo3</code>)</li>
+                </ul>
+                <p>
+                    The camera works on a cold boot. Open it once and it streams fine. Close it and reopen it
+                    immediately, and it fails. The failure isn't loud — just a timeout:
+                </p>
+                <pre><code>[  124.567890] ov02c10 24-0036: chip id 0x20c
+[  124.890123] cam-csiphy-cam 24-0036: cam_csiphy_irq: CSIPHY_IRQ_STATUS 0x0
+[  125.123456] ov02c10 24-0036: failed to start streaming
+[  125.123457] ov02c10 24-0036: Connection timed out</code></pre>
+                <p>
+                    Notice line 1: the chip ID reads correctly (<code>0x20c</code>). The sensor is
+                    on the I2C bus and responding. But the CSI-2/analog streaming block
+                    fails to come up. The sensor is stuck in an indeterminate internal state.
+                </p>
+
+                <h2>Root Cause: The Passive Discharge Problem</h2>
+
+                <h3>What active discharge is</h3>
+                <p>
+                    Most modern PMICs can actively pull a rail to ground when disabled — bleed resistors or
+                    dedicated discharge circuitry drain the bulk capacitance quickly (typically &lt;50ms).
+                    This is called <strong>active discharge</strong>.
+                </p>
+                <p>
+                    Without it, the rail discharges passively through leakage current alone.
+                    With the large bulk capacitors on the Yoga Slim 7x camera rails, that takes
+                    approximately <strong>2.3 seconds</strong> to go from 2.8V to a safe near-zero voltage.
+                </p>
+
+                <h3>The brownout zone</h3>
+                <p>
+                    If the camera is re-opened while the AVDD/DOVDD rails are anywhere in the
+                    <strong>0.1V–1.0V</strong> range, the sensor's internal logic doesn't see a clean
+                    power-on. It partially initialises, the analog and CSI-2 blocks end up in an
+                    undefined state, and no amount of I2C register writing will recover it without
+                    a full rail cycle that starts from 0V.
+                </p>
+
+                <div class="callout">
+                    <i class="fas fa-flask"></i>
+                    <p>
+                        <strong>How was the 2.3s figure determined without direct measurement?</strong>
+                        Direct oscilloscope access is the ideal approach, but on this platform the hypervisor
+                        firewalls direct PMIC register access, so the PMIC's internal discharge configuration
+                        can't be read from the kernel. The 2.3s figure was derived from RC time constant
+                        analysis: known bulk capacitance on the rails combined with estimated leakage resistance
+                        gives an exponential decay curve consistent with the observed failure window
+                        (failures reliably occur for reopens within 0–2s, not after 2.3s+). It's physics-driven
+                        inference, not a direct measurement — and that distinction matters for the upstream story.
+                    </p>
+                </div>
+
+                <h3>Why active discharge isn't working</h3>
+                <p>
+                    Here's where it gets interesting. According to a Qualcomm engineer (Kamal),
+                    active discharge <em>should</em> be enabled by default on this PMIC configuration.
+                    If that's true, the PMIC itself should be pulling the rails low on disable, and
+                    passive discharge timing shouldn't matter.
+                </p>
+                <p>
+                    But it clearly isn't working. The most likely explanation is that the UEFI/firmware
+                    layer is configuring the PMIC's RPMh resource tables in a way that disables or
+                    overrides the active discharge setting, and those settings survive into the
+                    kernel's runtime control of the rail. Investigating the exact RPMh resource
+                    commands needed to re-enable active discharge from the kernel driver is the
+                    <strong>ongoing open problem</strong> — more on that at the end.
+                </p>
+
+                <h2>The Six-Patch Local Fix</h2>
+                <p>
+                    The working solution in my local tree is a combination of six patches across three
+                    subsystems. In order:
+                </p>
+
+                <div class="patch-grid">
+                    <span class="patch-num">0001</span>
+                    <span class="patch-desc"><strong>media: ov02c10 — Fix use-after-free in <code>remove()</code></strong><br>
+                    The original cleanup order freed V4L2 control handler and media entity resources
+                    <em>before</em> powering off the device. If PipeWire/WirePlumber accessed a control
+                    during removal, this caused a use-after-free and "Execute from non-executable memory" oops.
+                    Fix: power off and disable runtime PM <em>first</em>, then free V4L2 structures.
+                    Reviewed-by Hans de Goede.</span>
+
+                    <span class="patch-num">0002</span>
+                    <span class="patch-desc"><strong>media: ov02c10 — Correct power-on sequence and timing</strong><br>
+                    The original driver de-asserted XSHUTDOWN (reset) and then applied a 2ms delay
+                    as an afterthought. The datasheet requires reset to be asserted (active) for
+                    T1 ≥ 5ms <em>before</em> power rails are enabled — a cold-start guarantee
+                    that was being skipped. Fix: assert reset → 5ms delay → enable clocks/rails
+                    → de-assert reset → 5ms boot delay before first I2C access.</span>
+
+                    <span class="patch-num">0003</span>
+                    <span class="patch-desc"><strong>dt-bindings: qcom,rpmh — Allow <code>regulator-off-on-delay-us</code></strong><br>
+                    The standard <code>regulator-off-on-delay-us</code> DT property already exists in
+                    the regulator core schema, but the qcom-rpmh binding YAML explicitly blocked it
+                    with <code>unevaluatedProperties: false</code>. Add the property to both the
+                    BOB and smps/ldo node patterns.</span>
+
+                    <span class="patch-num">0004</span>
+                    <span class="patch-desc"><strong>regulator: qcom-rpmh — Parse <code>regulator-off-on-delay-us</code> from DT</strong><br>
+                    The <code>qcom-rpmh-regulator</code> driver never read this standard property.
+                    Add one line to <code>rpmh_regulator_init_vreg()</code> to parse and store it into
+                    <code>vreg-&gt;rdesc.off_on_delay</code> — the regulator core then enforces the
+                    delay automatically between every disable and re-enable.</span>
+
+                    <span class="patch-num">0005</span>
+                    <span class="patch-desc"><strong>arm64: dts: yoga-slim7x — Add off-on-delay to camera regulators</strong><br>
+                    Set <code>regulator-off-on-delay-us = &lt;2300000&gt;</code> on
+                    <code>ldo7</code> (AVDD 2.8V), <code>ldo1</code> (DVDD 1.2V), and
+                    <code>ldo3</code> (DOVDD 1.8V). The regulator core will now refuse to
+                    re-enable any of these rails within 2.3s of the last disable.</span>
+
+                    <span class="patch-num">0006</span>
+                    <span class="patch-desc"><strong>media: ov02c10 — Runtime PM autosuspend (2300ms delay)</strong><br>
+                    Even with the 2.3s off-on constraint, blocking every <code>enable_streams</code>
+                    call for up to 2.3s would make the camera unusably slow for normal usage.
+                    The fix: switch <code>pm_runtime_put()</code> to <code>pm_runtime_put_autosuspend()</code>
+                    with a 2300ms delay. This keeps the rails hot for just over the discharge window
+                    after each close, so a rapid reopen almost never actually power-cycles the hardware.</span>
+                </div>
+
+                <h3>How the two mechanisms work together</h3>
+                <p>
+                    The autosuspend covers the common case — browser permission prompts, app switching,
+                    any reopen within ~2 seconds. The rails stay up, no discharge occurs, no brownout.
+                </p>
+                <p>
+                    For the uncommon case where the rails actually do go down (left closed for &gt;2.3s of
+                    autosuspend inactivity), the <code>off_on_delay</code> constraint kicks in and makes the
+                    regulator core block the next enable until the full 2.3s discharge window has passed.
+                    Together they eliminate all brownout paths without breaking deep sleep.
+                </p>
+
+                <h2>The Upstream Story (And Why I Withdrew)</h2>
+
+                <p>The series was submitted as two threads — media patches first, regulator patches separately.</p>
+
+                <ol class="attempt-list">
+                    <li class="rejected">
+                        <strong>Attempt 1: Driver-side <code>msleep()</code></strong>
+                        <span class="outcome-badge badge-rejected">Rejected</span><br>
+                        Adding a fixed sleep in <code>ov02c10_probe()</code>. Immediately rejected
+                        — dirty, non-portable, wrong layer entirely.
+                    </li>
+                    <li class="partial">
+                        <strong>Attempt 2: Keep regulators always-on + software reset</strong>
+                        <span class="outcome-badge badge-partial">Avoided</span><br>
+                        Keeping AVDD/DOVDD permanently enabled eliminates the discharge problem.
+                        Works, but prevents deep sleep and wastes milliwatts continuously. Discarded as
+                        a permanent solution.
+                    </li>
+                    <li class="partial">
+                        <strong>Attempt 3: Full combined series upstream</strong>
+                        <span class="outcome-badge badge-withdrawn">Withdrawn</span><br>
+                        The combined approach (patches 1–6) was the proposal.
+                        Regulator maintainers asked for direct register evidence that active discharge
+                        was not configured. That evidence is inaccessible — the hypervisor on this
+                        platform firewalls PMIC register reads from kernel space. Without being able
+                        to produce a register dump, the claim that active discharge is broken is
+                        inference only. <strong>Series withdrawn.</strong>
+                    </li>
+                    <li class="partial">
+                        <strong>Attempt 4: Datasheet compliance patches only (Patches 1 &amp; 2)</strong>
+                        <span class="outcome-badge badge-withdrawn">Withdrawn</span><br>
+                        Submitted the use-after-free fix and power-on sequencing fix in isolation
+                        (both are correct regardless of the brownout issue). But without the regulator
+                        constraints, they don't prevent the crash on brownout-affected hardware.
+                        Withdrawn to avoid landing half a fix.
+                    </li>
+                    <li class="current">
+                        <strong>Local tree — all 6 patches applied</strong>
+                        <span class="outcome-badge badge-works">100% stable locally</span><br>
+                        Camera initialises reliably on every rapid open/close cycle.
+                        Zero failures across days of testing including browser video calls.
+                    </li>
+                </ol>
+
+                <div class="callout" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.25);">
+                    <i class="fas fa-triangle-exclamation" style="color:#fbbf24;"></i>
+                    <p>
+                        <strong>The core upstream problem:</strong> The regulator maintainers' ask is reasonable.
+                        "Active discharge is supposed to be on, so prove it isn't" is a fair standard for
+                        adding a platform-specific 2.3-second delay to a generic regulator driver.
+                        The hypervisor firewall makes that proof physically impossible from the kernel.
+                        Without a way to bypass the firmware restriction (or get PMIC register traces from
+                        a JTAG/UART debug session from Qualcomm/Lenovo), the upstream path is blocked.
+                    </p>
+                </div>
+
+                <h2>The Open Problem: Active Discharge</h2>
+                <p>
+                    The 2.3s autosuspend + off-on-delay approach is a workaround, not a root-cause fix.
+                    The root cause is that active discharge isn't functioning on these rails.
+                    If it were, the PMIC would drain the capacitors in milliseconds, the brownout window
+                    would not exist, and none of this complexity would be needed.
+                </p>
+                <p>
+                    According to Qualcomm engineer Kamal, active discharge (PD — pull-down) is enabled
+                    by default on this PMIC. <strong>I'm now investigating why it isn't working.</strong>
+                    The most promising avenue is porting the active discharge logic from similar
+                    Qualcomm sister boards into the <code>qcom-rpmh-regulator</code> driver —
+                    specifically, identifying the correct RPMh resource commands to explicitly
+                    configure the pull-down on <code>ldo1</code>, <code>ldo3</code>, and <code>ldo7</code>.
+                </p>
+                <p>
+                    This involves:
+                </p>
+                <ul>
+                    <li>Reverse-engineering the RPMh resource table entries for active discharge
+                        on the PM8550 LDO topology</li>
+                    <li>Cross-referencing with boards that work correctly (other X Elite variants
+                        and QRD reference designs)</li>
+                    <li>Validating whether the firmware UEFI is overriding the driver's RPMh commands</li>
+                </ul>
+                <p>
+                    If active discharge can be re-enabled from the driver, that's the clean upstream-ready
+                    fix — no arbitrary delays, no DT hacks, no autosuspend tuning.
+                    It's also the harder and less certain path. When I have results, I'll update this post.
+                </p>
+
+                <h2>Takeaways</h2>
+                <ul>
+                    <li><strong>A correct chip ID read is not a pass.</strong> The OV02C10 I2C interface
+                        and the CSI-2/analog block are on separate power domains internally.
+                        The sensor can acknowledge I2C while the streaming block is in a brown-out limbo.</li>
+                    <li><strong>The regulator core already has the right abstraction.</strong>
+                        <code>off_on_delay</code> in <code>struct regulator_desc</code> exists
+                        exactly for this problem. The qcom-rpmh driver just wasn't reading it from DT.
+                        Sometimes the fix is one line: <code>of_property_read_u32(node, "regulator-off-on-delay-us", &amp;vreg-&gt;rdesc.off_on_delay)</code>.</li>
+                    <li><strong>Autosuspend is the right UX layer.</strong> Enforcing a 2.3s blocking
+                        delay on every power cycle would be unusable. Autosuspend keeps the hardware warm
+                        across rapid cycling while still allowing deep sleep on genuine idle.</li>
+                    <li><strong>Firmware firewalls change what "proof" means.</strong>
+                        The hypervisor blocking PMIC register access is not a kernel security problem —
+                        it's a deliberate firmware design. But it creates a real gap in what kernel
+                        developers can observe and prove, which directly affects what patches can be
+                        accepted upstream. Hardware access constraints are part of the debugging environment.</li>
+                    <li><strong>Cleanup order in <code>remove()</code> matters for media drivers.</strong>
+                        The V4L2 async framework can have userspace hold references to subdev controls
+                        right up until removal completes. Power off the device before freeing control
+                        handlers, not after.</li>
+                </ul>
+
+            </div><!-- /.post-body -->
+
+            <!-- Author / Back -->
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--surface-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <p style="font-weight:700; margin-bottom:0.2rem;">Jaya Saikiran Banigallapati</p>
+                    <p style="color: var(--text-muted); font-size:0.9rem;">Linux Kernel Contributor &amp; Power Platform Developer</p>
+                </div>
+                <a href="blog.html" class="btn btn-secondary" style="margin-left:0;">
+                    <i class="fas fa-arrow-left" style="margin-right:0.5rem;"></i> All Posts
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <div class="footer-buttons">
+                    <div class="footer-buttons-row">
+                        <a href="mailto:bjsaikiran@gmail.com" class="email-link"><i class="fas fa-envelope"></i> bjsaikiran@gmail.com</a>
+                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email" aria-label="Copy email address"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
+                    </div>
+                    <a href="assets/Saikiran_Resume.pdf" download class="btn btn-secondary"><i class="fas fa-download"></i> Download Resume</a>
+                </div>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon" aria-label="GitHub profile"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon" aria-label="LinkedIn profile"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Jaya Saikiran Banigallapati. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+</body>
+
+</html>

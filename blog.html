@@ -46,14 +46,10 @@
                 <li><a href="blog.html" class="active">Blogs</a></li>
                 <li><a href="index.html#contact" class="btn-primary">Contact Me</a></li>
                 <!-- Theme Toggle -->
-                <li class="theme-select-wrapper">
-                    <select id="theme-select" class="theme-select" aria-label="Choose color theme">
-                        <option value="midnight">Midnight</option>
-                        <option value="blue">Blueish</option>
-                        <option value="glass">Glass</option>
-                        <option value="light">Light</option>
-                    </select>
-                    <i class="fas fa-palette theme-icon"></i>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
                 </li>
             </ul>
             <button class="menu-toggle" aria-label="Toggle navigation menu">
@@ -71,30 +67,94 @@
             </div>
 
             <div class="grid-layout masonry">
-                <!-- Blog Post Placeholder 1 -->
+                <!-- Blog Post 1: Camera brownout -->
+                <article class="card glass-card" onclick="window.location.href='blog-camera-brownout.html'" style="cursor:pointer;">
+                    <div class="card-content">
+                        <span class="date"><i class="fas fa-calendar-alt" style="margin-right:0.3rem;"></i> February 2026</span>
+                        <h3 style="margin-top:0.6rem;">Debugging a Camera Brownout on Snapdragon X Elite — OV02C10 &amp; the Passive Discharge Problem</h3>
+                        <p>The front camera on the Lenovo Yoga Slim 7x fails silently on rapid power cycling.
+                            The chip ID reads fine but streaming times out. Root cause: PMIC rails take 2.3s
+                            to discharge, leaving the sensor in a brownout zone. Here's the 6-patch local fix and
+                            why it hasn't landed upstream.</p>
+                        <div class="tags">
+                            <span class="tag">Linux Kernel</span>
+                            <span class="tag">V4L2 / Media</span>
+                            <span class="tag">PMIC / Regulator</span>
+                            <span class="tag">In Progress</span>
+                        </div>
+                        <a href="blog-camera-brownout.html" class="card-link" onclick="event.stopPropagation();">
+                            Read Post <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 2: Deep sleep fix -->
+                <article class="card glass-card" onclick="window.location.href='blog-deepsleep-fix.html'" style="cursor:pointer;">
+                    <div class="card-content">
+                        <span class="date"><i class="fas fa-calendar-alt" style="margin-right:0.3rem;"></i> February 2026</span>
+                        <h3 style="margin-top:0.6rem;">Fixing Deep Sleep on Snapdragon X Elite &mdash; Three Wake Sources, Five Patches</h3>
+                        <p>The Yoga Slim 7x refuses to stay asleep. Charger GLINK interrupts, I2C HID dummy
+                            regulators, and keyboard LED drain &mdash; three independent wake
+                            sources across three subsystems, each one capable of breaking s2idle on its own.</p>
+                        <div class="tags">
+                            <span class="tag">Linux Kernel</span>
+                            <span class="tag">Power Management</span>
+                            <span class="tag">s2idle</span>
+                        </div>
+                        <a href="blog-deepsleep-fix.html" class="card-link" onclick="event.stopPropagation();">
+                            Read Post <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 3: Linux kernel display fix -->
+                <article class="card glass-card" onclick="window.location.href='blog-linux-display-fix.html'" style="cursor:pointer;">
+                    <div class="card-content">
+                        <span class="date"><i class="fas fa-calendar-alt" style="margin-right:0.3rem;"></i> February 2026</span>
+                        <h3 style="margin-top:0.6rem;">DPU Encoder Wedge Detection &amp; Kernel Panic Fix on Snapdragon X Elite</h3>
+                        <p>After long suspend with an external DP monitor, the DPU vblank state freezes.
+                            Disconnecting the monitor was triggering a kernel panic and data corruption.
+                            Here's how I detected the wedge and fixed the crash — and what's still being worked on.</p>
+                        <div class="tags">
+                            <span class="tag">Linux Kernel</span>
+                            <span class="tag">DRM / DPU</span>
+                            <span class="tag">DisplayPort</span>
+                            <span class="tag">In Progress</span>
+                        </div>
+                        <a href="blog-linux-display-fix.html" class="card-link" onclick="event.stopPropagation();">
+                            Read Post <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 4: Coming soon -->
                 <article class="card glass-card">
                     <div class="card-content">
                         <span class="date">Coming Soon</span>
-                        <h3>Welcome to my Blog</h3>
-                        <p>Stay tuned for technical guides, Linux kernel deep dives, and Power Platform tips. I'll be
-                            sharing my experiences and random fixes here.</p>
+                        <h3 style="margin-top:0.6rem;">Sustainability in Tech: Eliminating Dark Data</h3>
+                        <p>Insights on how identifying and purging duplicate/obsolete files from enterprise data
+                            centres can slash storage costs and carbon footprints — and how I built a Power Platform
+                            solution that achieved &gt;50% storage optimisation.</p>
                         <div class="tags">
-                            <span class="tag">Intro</span>
-                            <span class="tag">Tech</span>
+                            <span class="tag">Sustainability</span>
+                            <span class="tag">Power Automate</span>
+                            <span class="tag">Green IT</span>
                         </div>
                     </div>
                 </article>
 
-                <!-- Blog Post Placeholder 2 -->
+                <!-- Blog Post 5: Coming soon -->
                 <article class="card glass-card">
                     <div class="card-content">
                         <span class="date">Coming Soon</span>
-                        <h3>Sustainability in Tech</h3>
-                        <p>Insights on how we can reduce carbon footprints through efficient data management and "Green
-                            IT" practices.</p>
+                        <h3 style="margin-top:0.6rem;">Building a Memory-Safe Checkout Engine in Rust + WASM</h3>
+                        <p>A tour of building a real discount and receipt engine in Rust, compiling it to WebAssembly
+                            with <code>wasm-bindgen</code>, and embedding it in a static HTML page — no Node, no
+                            bundler, no backend.</p>
                         <div class="tags">
-                            <span class="tag">Sustainability</span>
-                            <span class="tag">Green IT</span>
+                            <span class="tag">Rust</span>
+                            <span class="tag">WebAssembly</span>
+                            <span class="tag">wasm-bindgen</span>
                         </div>
                     </div>
                 </article>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://saikiran2001-v2.github.io/sitemap.xml

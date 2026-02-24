@@ -701,14 +701,10 @@
                 <li><a href="rust-playground.html">My Rust Playground</a></li>
                 <li><a href="blog.html">Blogs</a></li>
                 <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
-                <li class="theme-select-wrapper">
-                    <select id="theme-select" class="theme-select" aria-label="Choose color theme">
-                        <option value="midnight">Midnight</option>
-                        <option value="blue">Blueish</option>
-                        <option value="glass">Glass</option>
-                        <option value="light">Light</option>
-                    </select>
-                    <i class="fas fa-palette theme-icon"></i>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
                 </li>
             </ul>
             <button class="menu-toggle" aria-label="Toggle navigation menu">
@@ -1801,16 +1797,24 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         // Theme
-        const themeSelect = document.getElementById('theme-select');
+        const THEMES = ['midnight', 'blue', 'glass', 'light'];
+        const THEME_ICONS = { midnight: 'fa-moon', blue: 'fa-water', glass: 'fa-circle-half-stroke', light: 'fa-sun' };
         const root = document.documentElement;
-        const currentTheme = localStorage.getItem('theme') || '';
-        if (currentTheme) root.setAttribute('data-theme', currentTheme);
-        if (themeSelect) {
-            themeSelect.value = currentTheme || 'midnight';
-            themeSelect.addEventListener('change', e => {
-                const theme = e.target.value;
-                if (theme === 'midnight') { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); }
-                else { root.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+        const themeBtn = document.getElementById('theme-toggle');
+
+        function applyTheme(theme) {
+            if (theme === 'midnight') { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); }
+            else { root.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+            if (themeBtn) {
+                themeBtn.querySelector('i').className = `fas ${THEME_ICONS[theme]}`;
+                themeBtn.title = `Theme: ${theme} — click to switch`;
+            }
+        }
+        applyTheme(localStorage.getItem('theme') || 'midnight');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                const current = root.getAttribute('data-theme') || 'midnight';
+                applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
             });
         }
 
