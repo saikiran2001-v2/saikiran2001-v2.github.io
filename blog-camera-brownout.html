@@ -294,12 +294,6 @@
         .badge-withdrawn { background: rgba(148,163,184,0.15); color: #94a3b8; }
         .badge-open     { background: rgba(139,92,246,0.15); color: #a78bfa; }
 
-        [data-theme="light"] .post-body pre {
-            background: #f1f5f9;
-            border-color: #e2e8f0;
-            color: #334155;
-        }
-
         @media (max-width: 768px) {
             .post-title { font-size: 1.8rem; }
             .patch-grid { grid-template-columns: 1fr; }
@@ -309,6 +303,12 @@
 </head>
 
 <body>
+
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+    <!-- Reading Progress -->
+    <div class="reading-progress" aria-hidden="true"></div>
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -338,6 +338,8 @@
             </button>
         </div>
     </nav>
+
+    <main id="main-content">
 
     <div class="post-hero">
         <div class="post-container">
@@ -655,6 +657,8 @@
         </div>
     </div>
 
+    </main>
+
     <!-- Footer -->
     <footer>
         <div class="container footer-content">
@@ -680,6 +684,10 @@
     </footer>
 
     <script src="assets/js/script.js"></script>
+
+    <!-- Analytics (GoatCounter — privacy-friendly, no cookies) -->
+    <script data-goatcounter="https://saikiran2001-v2.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </body>
 
 </html>

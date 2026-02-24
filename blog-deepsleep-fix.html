@@ -296,12 +296,6 @@
             font-size: 1.2rem;
         }
 
-        [data-theme="light"] .post-body pre {
-            background: #f1f5f9;
-            border-color: #e2e8f0;
-            color: #334155;
-        }
-
         @media (max-width: 768px) {
             .post-title { font-size: 1.8rem; }
             .flow-diagram { grid-template-columns: 1fr; }
@@ -311,6 +305,12 @@
 </head>
 
 <body>
+
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+    <!-- Reading Progress -->
+    <div class="reading-progress" aria-hidden="true"></div>
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -340,6 +340,8 @@
             </button>
         </div>
     </nav>
+
+    <main id="main-content">
 
     <div class="post-hero">
         <div class="post-container">
@@ -661,6 +663,8 @@ i2c_smbus_write_byte_data(client, EC_SUSPEND_RESUME_REG, EC_NOTIFY_SUSPEND_ENTER
         </div>
     </div>
 
+    </main>
+
     <!-- Footer -->
     <footer>
         <div class="container footer-content">
@@ -686,6 +690,10 @@ i2c_smbus_write_byte_data(client, EC_SUSPEND_RESUME_REG, EC_NOTIFY_SUSPEND_ENTER
     </footer>
 
     <script src="assets/js/script.js"></script>
+
+    <!-- Analytics (GoatCounter — privacy-friendly, no cookies) -->
+    <script data-goatcounter="https://saikiran2001-v2.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </body>
 
 </html>

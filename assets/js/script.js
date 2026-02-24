@@ -10,17 +10,15 @@ function copyEmail(btn) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // ── Theme Management ──────────────────────────────────────────────────────
-    const THEMES = ['midnight', 'blue', 'glass', 'light'];
+    const THEMES = ['midnight', 'blue', 'light'];
     const THEME_ICONS = {
         midnight: 'fa-moon',
         blue:     'fa-water',
-        glass:    'fa-circle-half-stroke',
         light:    'fa-sun',
     };
     const THEME_LABELS = {
         midnight: 'Midnight',
         blue:     'Blueish',
-        glass:    'Glass',
         light:    'Light',
     };
 
@@ -59,28 +57,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelector('.nav-links');
     const navbar = document.querySelector('.navbar');
 
-    menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        menuToggle.querySelector('i').classList.toggle('fa-bars');
-        menuToggle.querySelector('i').classList.toggle('fa-times');
-    });
-
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            menuToggle.querySelector('i').classList.remove('fa-times');
-            menuToggle.querySelector('i').classList.add('fa-bars');
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            const isOpen = navLinks.classList.toggle('active');
+            menuToggle.querySelector('i').classList.toggle('fa-bars');
+            menuToggle.querySelector('i').classList.toggle('fa-times');
+            menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
-    });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.querySelector('i').classList.remove('fa-times');
+                menuToggle.querySelector('i').classList.add('fa-bars');
+            });
+        });
+    }
 
     // ── Navbar Background on Scroll ───────────────────────────────────────────
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
 
     // ── Scroll Animations (Intersection Observer) ─────────────────────────────
     const observer = new IntersectionObserver((entries) => {
@@ -97,6 +100,83 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.transitionDelay = `${(i % 3) * 0.1}s`;
         observer.observe(el);
     });
+
+    // ── Reading Progress Bar ─────────────────────────────────────────────────
+    const progressBar = document.querySelector('.reading-progress');
+    const postBody = document.querySelector('.post-body');
+    if (progressBar && postBody) {
+        window.addEventListener('scroll', () => {
+            const rect = postBody.getBoundingClientRect();
+            const start = postBody.offsetTop;
+            const total = postBody.scrollHeight;
+            const scrolled = window.scrollY - start;
+            const pct = Math.min(100, Math.max(0, (scrolled / (total - window.innerHeight)) * 100));
+            progressBar.style.width = pct + '%';
+        });
+    }
+
+    // ── Mobile Nav Accessibility ──────────────────────────────────────────────
+    if (menuToggle) {
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.setAttribute('aria-controls', 'nav-links');
+    }
+    if (navLinks) {
+        navLinks.id = 'nav-links';
+        navLinks.setAttribute('role', 'navigation');
+        navLinks.setAttribute('aria-label', 'Main navigation');
+    }
+
+    // ── View Transitions API ──────────────────────────────────────────────────
+    if (document.startViewTransition) {
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (!link) return;
+            const url = new URL(link.href, location.href);
+            // Only handle same-origin, non-anchor, non-download links
+            if (url.origin !== location.origin) return;
+            if (url.pathname === location.pathname && url.hash) return;
+            if (link.hasAttribute('download') || link.target === '_blank') return;
+            e.preventDefault();
+            document.startViewTransition(() => {
+                location.href = link.href;
+            });
+        });
+    }
+
+    // ── Contact Form Handling ─────────────────────────────────────────────────
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = contactForm.querySelector('.form-submit');
+            const status = contactForm.querySelector('.form-status');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            status.textContent = '';
+            status.className = 'form-status';
+
+            try {
+                const res = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: new FormData(contactForm),
+                    headers: { 'Accept': 'application/json' },
+                });
+                if (res.ok) {
+                    status.textContent = 'Message sent! I\'ll get back to you soon.';
+                    status.classList.add('success');
+                    contactForm.reset();
+                } else {
+                    throw new Error('Failed');
+                }
+            } catch {
+                status.textContent = 'Oops — something went wrong. Try emailing me directly.';
+                status.classList.add('error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+            }
+        });
+    }
 
     // ── Hero Particle Canvas ──────────────────────────────────────────────────
     const canvas = document.getElementById('hero-canvas');
@@ -134,7 +214,7 @@ function initParticles(canvas) {
 
     function getAccentHex() {
         const theme = document.documentElement.getAttribute('data-theme') || 'midnight';
-        const map = { midnight: '59,130,246', blue: '59,130,246', glass: '59,130,246', light: '37,99,235' };
+        const map = { midnight: '59,130,246', blue: '59,130,246', light: '37,99,235' };
         return map[theme] || '59,130,246';
     }
 

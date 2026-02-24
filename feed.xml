@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Saikiran's Blog</title>
+    <link>https://saikiran2001-v2.github.io/blog.html</link>
+    <description>Technical blogs — kernel patches, debugging stories, and guides by Jaya Saikiran Banigallapati.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 01 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://saikiran2001-v2.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>Debugging a Camera Brownout on Snapdragon X Elite — OV02C10 &amp; the Passive Discharge Problem</title>
+      <link>https://saikiran2001-v2.github.io/blog-camera-brownout.html</link>
+      <guid>https://saikiran2001-v2.github.io/blog-camera-brownout.html</guid>
+      <pubDate>Sat, 01 Feb 2026 00:00:00 +0000</pubDate>
+      <description>The front camera on the Lenovo Yoga Slim 7x fails silently on rapid power cycling. The chip ID reads fine but streaming times out. Root cause: PMIC rails take 2.3s to discharge, leaving the sensor in a brownout zone.</description>
+    </item>
+
+    <item>
+      <title>Fixing Deep Sleep on Snapdragon X Elite — Three Wake Sources, Five Patches</title>
+      <link>https://saikiran2001-v2.github.io/blog-deepsleep-fix.html</link>
+      <guid>https://saikiran2001-v2.github.io/blog-deepsleep-fix.html</guid>
+      <pubDate>Sat, 01 Feb 2026 00:00:00 +0000</pubDate>
+      <description>The Yoga Slim 7x refuses to stay asleep. Charger GLINK interrupts, I2C HID dummy regulators, and keyboard LED drain — three independent wake sources across three subsystems, each one capable of breaking s2idle on its own.</description>
+    </item>
+
+    <item>
+      <title>DPU Encoder Wedge Detection &amp; Kernel Panic Fix on Snapdragon X Elite</title>
+      <link>https://saikiran2001-v2.github.io/blog-linux-display-fix.html</link>
+      <guid>https://saikiran2001-v2.github.io/blog-linux-display-fix.html</guid>
+      <pubDate>Sat, 01 Feb 2026 00:00:00 +0000</pubDate>
+      <description>After long suspend with an external DP monitor, the DPU vblank state freezes. Disconnecting the monitor was triggering a kernel panic and data corruption. Here's how I detected the wedge and fixed the crash.</description>
+    </item>
+
+  </channel>
+</rss>

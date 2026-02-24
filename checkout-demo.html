@@ -297,17 +297,6 @@
             color: #0f172a;
         }
 
-        [data-theme="glass"] .promo-section select {
-            background-color: rgba(255, 255, 255, 0.5);
-            color: #111827;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-        }
-
-        [data-theme="glass"] .promo-section select option {
-            background: #1e293b;
-            color: #f8fafc;
-        }
-
         .promo-applied {
             display: none;
             align-items: center;
@@ -540,6 +529,9 @@
 
 <body>
 
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
@@ -567,6 +559,8 @@
             </button>
         </div>
     </nav>
+
+    <main id="main-content">
 
     <!-- Hero -->
     <section class="checkout-hero">
@@ -673,6 +667,8 @@
             </div>
         </div>
     </div>
+
+    </main>
 
     <!-- Footer -->
     <footer id="contact">
@@ -923,6 +919,10 @@
 
         initWasm();
     </script>
+
+    <!-- Analytics (GoatCounter — privacy-friendly, no cookies) -->
+    <script data-goatcounter="https://saikiran2001-v2.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </body>
 
 </html>

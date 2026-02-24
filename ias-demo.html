@@ -129,13 +129,6 @@
             background-color: rgba(0, 0, 0, 0.05);
         }
 
-        [data-theme="glass"] .form-group select,
-        [data-theme="glass"] .form-group input,
-        [data-theme="glass"] .form-group textarea {
-            background-color: rgba(255, 255, 255, 0.5);
-            color: #111827;
-        }
-
         .form-group select:focus,
         .form-group input:focus,
         .form-group textarea:focus {
@@ -166,17 +159,8 @@
             color: #0f172a;
         }
 
-        [data-theme="glass"] .form-group select option {
-            background: #1e293b;
-            color: #f8fafc;
-        }
-
         [data-theme="light"] .form-group select {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-        }
-
-        [data-theme="glass"] .form-group select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
         }
 
         .form-group textarea {
@@ -445,8 +429,7 @@
             overflow: hidden;
         }
 
-        [data-theme="light"] .score-bar-track,
-        [data-theme="glass"] .score-bar-track {
+        [data-theme="light"] .score-bar-track {
             background: rgba(0, 0, 0, 0.08);
         }
 
@@ -491,8 +474,7 @@
             padding: 0.8rem 1rem;
         }
 
-        [data-theme="light"] .ml-stat,
-        [data-theme="glass"] .ml-stat {
+        [data-theme="light"] .ml-stat {
             background: rgba(0, 0, 0, 0.04);
         }
 
@@ -570,8 +552,7 @@
             border-radius: 10px;
         }
 
-        [data-theme="light"] .weight-item,
-        [data-theme="glass"] .weight-item {
+        [data-theme="light"] .weight-item {
             background: rgba(0, 0, 0, 0.04);
         }
 
@@ -685,6 +666,9 @@
 
 <body>
 
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
@@ -712,6 +696,8 @@
             </button>
         </div>
     </nav>
+
+    <main id="main-content">
 
     <!-- Hero -->
     <section class="ias-hero">
@@ -830,6 +816,8 @@
             </div>
         </div>
     </section>
+
+    </main>
 
     <!-- Footer -->
     <footer id="contact">
@@ -1797,8 +1785,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         // Theme
-        const THEMES = ['midnight', 'blue', 'glass', 'light'];
-        const THEME_ICONS = { midnight: 'fa-moon', blue: 'fa-water', glass: 'fa-circle-half-stroke', light: 'fa-sun' };
+        const THEMES = ['midnight', 'blue', 'light'];
+        const THEME_ICONS = { midnight: 'fa-moon', blue: 'fa-water', light: 'fa-sun' };
         const root = document.documentElement;
         const themeBtn = document.getElementById('theme-toggle');
 
@@ -1846,6 +1834,10 @@
         renderEngineerPool();
     });
     </script>
+
+    <!-- Analytics (GoatCounter — privacy-friendly, no cookies) -->
+    <script data-goatcounter="https://saikiran2001-v2.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 
 </body>
 </html>
