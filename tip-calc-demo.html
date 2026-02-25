@@ -381,6 +381,16 @@
             border-bottom: 1px solid #333;
         }
 
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot.red    { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green  { background: #28c840; }
+
         .summary-body {
             padding: 1.5rem;
             font-family: 'JetBrains Mono', monospace;
@@ -513,13 +523,13 @@
                     <div class="field-group">
                         <label for="bill-input">Bill Amount ($)</label>
                         <input type="number" id="bill-input" placeholder="0.00" min="0" step="0.01">
-                        <div class="quick-row">
-                            <button onclick="setBill(20)">$20</button>
-                            <button onclick="setBill(50)">$50</button>
-                            <button onclick="setBill(75)">$75</button>
-                            <button onclick="setBill(100)">$100</button>
-                            <button onclick="setBill(150)">$150</button>
-                            <button onclick="setBill(200)">$200</button>
+                        <div class="quick-row" id="bill-presets">
+                            <button onclick="setBill(20)" data-amount="20">$20</button>
+                            <button onclick="setBill(50)" data-amount="50">$50</button>
+                            <button onclick="setBill(75)" data-amount="75">$75</button>
+                            <button onclick="setBill(100)" data-amount="100">$100</button>
+                            <button onclick="setBill(150)" data-amount="150">$150</button>
+                            <button onclick="setBill(200)" data-amount="200">$200</button>
                         </div>
                     </div>
 
@@ -556,13 +566,13 @@
                             <button id="btn-inc" onclick="changePeople(1)" aria-label="Increase people">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <div class="quick-row" style="margin-top:0;">
-                                <button onclick="setPeople(1)">Solo</button>
-                                <button onclick="setPeople(2)">2</button>
-                                <button onclick="setPeople(4)">4</button>
-                                <button onclick="setPeople(6)">6</button>
-                                <button onclick="setPeople(8)">8</button>
-                            </div>
+                        </div>
+                        <div class="quick-row" id="people-presets" style="margin-top:0.5rem;">
+                            <button onclick="setPeople(1)" data-people="1">Solo</button>
+                            <button onclick="setPeople(2)" data-people="2" class="active">2</button>
+                            <button onclick="setPeople(4)" data-people="4">4</button>
+                            <button onclick="setPeople(6)" data-people="6">6</button>
+                            <button onclick="setPeople(8)" data-people="8">8</button>
                         </div>
                     </div>
                 </div>
@@ -785,8 +795,19 @@
         // Bill quick-set
         window.setBill = function(amount) {
             document.getElementById('bill-input').value = amount.toFixed(2);
+            document.querySelectorAll('#bill-presets button').forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.dataset.amount) === amount);
+            });
             updateUI();
         };
+
+        // Clear bill preset highlight when user types manually
+        document.getElementById('bill-input').addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            document.querySelectorAll('#bill-presets button').forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.dataset.amount) === val);
+            });
+        });
 
         // Tip preset buttons
         window.setTip = function(pct) {
@@ -813,6 +834,9 @@
             numPeople = n;
             document.getElementById('people-display').textContent = n;
             document.getElementById('btn-dec').disabled = n <= 1;
+            document.querySelectorAll('#people-presets button').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.people) === n);
+            });
             updateUI();
         }
 
@@ -832,8 +856,7 @@
             document.getElementById('summary-overlay').classList.remove('show');
         };
 
-        // Input listeners
-        document.getElementById('bill-input').addEventListener('input', updateUI);
+        // Input listeners — bill input is already wired above with the preset-clear handler
 
         document.getElementById('tip-custom').addEventListener('input', function() {
             const val = parseFloat(this.value);
