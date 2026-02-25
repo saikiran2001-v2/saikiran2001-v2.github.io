@@ -467,6 +467,8 @@ img {
     height: 100%;
     z-index: 1;
     pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
 .blur-circle {
@@ -853,7 +855,87 @@ footer {
     opacity: 1;
 }
 
-.footer-socials {
+/* ── Toast Notifications ───────────────────────────────────── */
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+    max-width: 340px;
+    width: calc(100vw - 3rem);
+}
+
+.toast {
+    background: var(--surface-color);
+    border: 1px solid var(--surface-border);
+    border-left: 3px solid #fbbf24;
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    pointer-events: auto;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+    cursor: pointer;
+}
+
+.toast.toast-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.toast-hide {
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast-quote-text {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-main);
+    line-height: 1.5;
+    margin-bottom: 0.45rem;
+}
+
+.toast-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toast-char {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.toast-show-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast-konami-text {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+}
+
+.toast-konami-link {
+    font-size: 0.8rem;
+    color: var(--accent-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.toast-konami-link:hover { text-decoration: underline; }
     display: flex;
     gap: 1rem;
 }

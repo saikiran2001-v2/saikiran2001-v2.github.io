@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easter Eggs | Saikiran</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="TV show quotes, memes, and hidden fun — powered by curiosity.">
+    <meta property="og:title" content="Easter Eggs | Saikiran">
+    <meta property="og:description" content="TV show quotes, memes, and hidden fun.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/favicon.svg">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        /* Hero */
+        .eggs-hero {
+            padding: 120px 0 40px;
+            text-align: center;
+        }
+
+        .eggs-hero .section-subtitle {
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+        }
+
+        .eggs-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* ── DVD Bouncing Logo ──────────────────────────────────── */
+        .dvd-zone {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .dvd-zone-label {
+            position: absolute;
+            top: 0.75rem;
+            left: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+            z-index: 2;
+        }
+
+        .dvd-corner-counter {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+            z-index: 2;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dvd-logo {
+            position: absolute;
+            width: 152px;
+            height: 58px;
+            user-select: none;
+            pointer-events: none;
+            line-height: 0;
+        }
+
+        /* ── Quote Stage (Toast-style) ──────────────────────────── */
+        .quote-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-shuffle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.2rem;
+            border: 1px solid var(--accent-primary);
+            border-radius: 50px;
+            background: transparent;
+            color: var(--accent-primary);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-shuffle:hover {
+            background: var(--accent-primary);
+            color: #fff;
+        }
+
+        .show-filters {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .show-filter {
+            padding: 0.35rem 0.9rem;
+            border: 1px solid var(--surface-border);
+            border-radius: 50px;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .show-filter:hover,
+        .show-filter.active {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.08);
+        }
+
+        /* Quote stage */
+        .quote-stage {
+            max-width: 720px;
+            margin: 0 auto 3rem;
+        }
+
+        .quote-card-display {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 2.5rem 2.5rem 2rem;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: opacity 0.28s ease, transform 0.28s ease;
+        }
+
+        .quote-card-display.fading {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .q-mark {
+            font-size: 7rem;
+            line-height: 1;
+            color: #fbbf24;
+            opacity: 0.15;
+            font-family: Georgia, 'Times New Roman', serif;
+            position: absolute;
+            top: 0.25rem;
+            left: 1.2rem;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .q-text-display {
+            font-size: 1.15rem;
+            font-style: italic;
+            line-height: 1.75;
+            color: var(--text-main);
+            padding-left: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .q-attr {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding-left: 0.5rem;
+        }
+
+        .q-char-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .q-show-badge {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 50px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .q-show-badge[data-show="The Office"]        { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+        .q-show-badge[data-show="Friends"]           { background: rgba(168,85,247,0.12); color: #a855f7; border: 1px solid rgba(168,85,247,0.25); }
+        .q-show-badge[data-show="Big Bang Theory"]   { background: rgba(59,130,246,0.12); color: #3b82f6; border: 1px solid rgba(59,130,246,0.25); }
+        .q-show-badge[data-show="Brooklyn Nine-Nine"]{ background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+        .q-show-badge[data-show="Modern Family"]     { background: rgba(236,72,153,0.12); color: #ec4899; border: 1px solid rgba(236,72,153,0.25); }
+
+        .quote-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.2rem;
+        }
+
+        .q-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--surface-border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .q-nav-btn:hover {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .q-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* ── Memes Gallery ─────────────────────────────────────── */
+        /* removed */
+
+        @media (max-width: 600px) {
+            .dvd-zone { height: 240px; }
+            .quote-card-display { padding: 2rem 1.5rem 1.5rem; }
+            .q-text-display { font-size: 1rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Sai<span class="accent">kiran</span>.</a>
+            <ul class="nav-links">
+                <li class="nav-dropdown">
+                    <a href="index.html#professional-projects" class="nav-dropdown-toggle">Projects <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:0.25rem;"></i></a>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="index.html#professional-projects"><i class="fas fa-briefcase"></i> Professional Projects</a></li>
+                        <li><a href="index.html#projects"><i class="fas fa-code"></i> Personal Projects</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html#linux-works">Linux Works</a></li>
+                <li><a href="rust-playground.html">My Rust Playground</a></li>
+                <li><a href="blog.html">Blogs</a></li>
+                <li><a href="index.html#contact" class="btn btn-primary">Contact Me</a></li>
+                <li>
+                    <a href="easter-eggs.html" class="theme-toggle-btn" aria-label="Easter eggs" title="I'm feeling curious" style="text-decoration:none;">
+                        <i class="fas fa-egg"></i>
+                    </a>
+                </li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Hero -->
+    <section class="eggs-hero">
+        <div class="container">
+            <div class="eggs-badge"><i class="fas fa-egg"></i> Easter Eggs</div>
+            <h1 class="section-title">I'm Feeling <span class="accent">Curious</span></h1>
+            <p class="section-subtitle">
+                A collection of TV show quotes, the classic DVD screensaver, and other hidden fun. Because every portfolio needs a secret page.
+            </p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+
+            <!-- DVD Bounce Zone -->
+            <h2 class="section-title" style="font-size:1.4rem; margin-bottom:1rem;"><i class="fas fa-compact-disc" style="color:#fbbf24;"></i> The DVD Screensaver</h2>
+            <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.9rem;">Will it hit the corner? Watch and find out.</p>
+            <div class="dvd-zone" id="dvd-zone">
+                <span class="dvd-zone-label">dvd_screensaver.exe</span>
+                <span class="dvd-corner-counter" id="corner-counter">Corner hits: 0</span>
+                <div class="dvd-logo" id="dvd-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 76" width="152" height="58">
+                        <!-- Disc -->
+                        <circle cx="36" cy="38" r="33" fill="currentColor" opacity="0.88"/>
+                        <circle cx="36" cy="38" r="23" fill="rgba(0,0,0,0.38)"/>
+                        <circle cx="36" cy="38" r="13" fill="currentColor" opacity="0.82"/>
+                        <circle cx="36" cy="38" r="5" fill="rgba(0,0,0,0.75)"/>
+                        <!-- DVD wordmark -->
+                        <text x="80" y="46" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="30" font-style="italic" fill="currentColor">DVD</text>
+                        <!-- VIDEO subtext -->
+                        <text x="82" y="62" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="currentColor" letter-spacing="4.5">VIDEO</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Quotes Section -->
+            <div class="quote-section-header">
+                <h2 class="section-title" style="font-size:1.4rem;"><i class="fas fa-quote-left" style="color:#fbbf24;"></i> My Favourite Quotes</h2>
+                <button class="btn-shuffle" id="btn-shuffle"><i class="fas fa-random"></i> Random</button>
+            </div>
+
+            <div class="show-filters" id="show-filters">
+                <button class="show-filter active" data-show="all">All</button>
+                <button class="show-filter" data-show="The Office">The Office</button>
+                <button class="show-filter" data-show="Friends">Friends</button>
+                <button class="show-filter" data-show="Big Bang Theory">Big Bang Theory</button>
+                <button class="show-filter" data-show="Brooklyn Nine-Nine">Brooklyn 99</button>
+                <button class="show-filter" data-show="Modern Family">Modern Family</button>
+            </div>
+
+            <div class="quote-stage" id="quote-stage">
+                <div class="quote-card-display" id="quote-card">
+                    <div class="q-mark">&ldquo;</div>
+                    <div class="q-text-display" id="q-text-display"></div>
+                    <div class="q-attr">
+                        <span class="q-char-name" id="q-char-name"></span>
+                        <span class="q-show-badge" id="q-show-badge"></span>
+                    </div>
+                </div>
+                <div class="quote-nav">
+                    <button class="q-nav-btn" id="q-prev" aria-label="Previous quote"><i class="fas fa-chevron-left"></i></button>
+                    <span class="q-counter" id="q-counter">1 / 1</span>
+                    <button class="q-nav-btn" id="q-next" aria-label="Next quote"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container footer-content">
+            <div class="footer-left">
+                <h3>Let's collaborate.</h3>
+                <p>Open for opportunities in Power Platform development and Linux administration.</p>
+                <div class="footer-buttons">
+                    <a href="assets/Saikiran_Resume.pdf" download class="btn btn-secondary"><i class="fas fa-download"></i> Download Resume</a>
+                    <div class="footer-buttons-row">
+                        <a href="mailto:bjsaikiran@gmail.com" class="email-link"><i class="fas fa-envelope"></i> bjsaikiran@gmail.com</a>
+                        <button class="btn-copy-email" onclick="copyEmail(this)" title="Copy email" aria-label="Copy email address"><i class="fas fa-copy"></i><span class="copy-tooltip">Copied!</span></button>
+                    </div>
+                </div>
+                <p class="contact-divider">Or Contact me from here</p>
+                <form id="contact-form" action="https://formspree.io/f/mlgwagkl" method="POST" class="contact-form">
+                    <div class="form-group">
+                        <label for="contact-name">Name</label>
+                        <input type="text" id="contact-name" name="name" required autocomplete="name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email">Email</label>
+                        <input type="email" id="contact-email" name="email" required autocomplete="email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message">Message</label>
+                        <textarea id="contact-message" name="message" required placeholder="What's on your mind?"></textarea>
+                    </div>
+                    <button type="submit" class="form-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
+                    <div class="form-status" aria-live="polite"></div>
+                </form>
+            </div>
+            <div class="footer-socials">
+                <a href="https://github.com/saikiran2001-v2" target="_blank" class="social-icon" aria-label="GitHub profile"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/jaya-saikiran-banigallapati-08a431177/" target="_blank" class="social-icon" aria-label="LinkedIn profile"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Saikiran. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+    <script>
+    (function() {
+        /* ══════════════════════════════════════════════════════════════════
+           DVD Bouncing Logo — contained in .dvd-zone
+           ══════════════════════════════════════════════════════════════════ */
+        const zone = document.getElementById('dvd-zone');
+        const dvd  = document.getElementById('dvd-logo');
+        const counterEl = document.getElementById('corner-counter');
+
+        const DW = 152, DH = 58;
+        let x = Math.random() * Math.max(0, zone.clientWidth  - DW);
+        let y = Math.random() * Math.max(0, zone.clientHeight - DH);
+        let vx = 1.8, vy = 1.3;
+        let cornerHits = 0;
+        let cornerCooldown = false;   // prevents multi-count on single corner hit
+        const colors = ['#e53e3e','#dd6b20','#d69e2e','#38a169','#3182ce','#805ad5','#d53f8c','#00b5d8'];
+        let ci = 0;
+
+        function setColor() { dvd.style.color = colors[ci]; }
+        setColor();
+
+        function tick() {
+            const zw = zone.clientWidth, zh = zone.clientHeight;
+            let bounced = false;
+
+            x += vx; y += vy;
+            if (x <= 0)        { x = 0;       vx *= -1; bounced = true; }
+            if (x + DW >= zw)  { x = zw - DW; vx *= -1; bounced = true; }
+            if (y <= 0)        { y = 0;       vy *= -1; bounced = true; }
+            if (y + DH >= zh)  { y = zh - DH; vy *= -1; bounced = true; }
+
+            const isCorner = (x <= 2 || x + DW >= zw - 2) && (y <= 2 || y + DH >= zh - 2);
+            if (isCorner && !cornerCooldown) {
+                cornerHits++;
+                cornerCooldown = true;
+                counterEl.textContent = 'Corner hits: ' + cornerHits + ' ★';
+                dvd.style.filter = 'drop-shadow(0 0 14px ' + colors[ci] + ')';
+                setTimeout(() => { dvd.style.filter = 'none'; cornerCooldown = false; }, 800);
+            }
+            if (bounced) { ci = (ci + 1) % colors.length; setColor(); }
+
+            dvd.style.left = x + 'px';
+            dvd.style.top  = y + 'px';
+            requestAnimationFrame(tick);
+        }
+        tick();
+
+        /* ══════════════════════════════════════════════════════════════════
+           My Favourite Quotes — single toast-style display
+           ══════════════════════════════════════════════════════════════════ */
+        const quotes = [
+            // ── The Office — Michael Scott ─────────────────────────────────
+            { text: "That's what she said.", character: "Michael Scott", show: "The Office" },
+            { text: "I'm not superstitious, but I am a little stitious.", character: "Michael Scott", show: "The Office" },
+            { text: "I am Beyoncé, always.", character: "Michael Scott", show: "The Office" },
+            { text: "Would I rather be feared or loved? Easy. Both. I want people to be afraid of how much they love me.", character: "Michael Scott", show: "The Office" },
+            { text: "You miss 100% of the shots you don't take. — Wayne Gretzky — Michael Scott", character: "Michael Scott", show: "The Office" },
+            { text: "Wikipedia is the best thing ever. Anyone in the world can write anything they want about any subject, so you know you are getting the best possible information.", character: "Michael Scott", show: "The Office" },
+            { text: "I want to be loved. Is that so wrong? Is it so wrong to want to be loved?", character: "Michael Scott", show: "The Office" },
+            // ── Friends — Chandler Bing (favourite) ───────────────────────
+            { text: "Could I BE any more awkward?", character: "Chandler Bing", show: "Friends" },
+            { text: "I'm not great at the advice. Can I interest you in a sarcastic comment?", character: "Chandler Bing", show: "Friends" },
+            { text: "I make jokes when I'm uncomfortable.", character: "Chandler Bing", show: "Friends" },
+            { text: "Until I was 25, I thought the response to 'I love you' was 'Oh crap.'", character: "Chandler Bing", show: "Friends" },
+            { text: "Gum would be perfection.", character: "Chandler Bing", show: "Friends" },
+            { text: "I tend to keep talking until somebody stops me.", character: "Chandler Bing", show: "Friends" },
+            { text: "Oh I know, this must be so hard. Oh no, two women love me. They're both gorgeous and my wallet's too small for my fifties and my diamond shoes are too tight!", character: "Chandler Bing", show: "Friends" },
+            { text: "I'm not so good at the keeping it in. Hence all the jokes.", character: "Chandler Bing", show: "Friends" },
+            // ── Friends — Ross Geller ──────────────────────────────────────
+            { text: "We were on a break!", character: "Ross Geller", show: "Friends" },
+            { text: "Pivot! Pivot! PIIIVOT!", character: "Ross Geller", show: "Friends" },
+            { text: "I grew up knowing I was different, and my mother wouldn't stand for that.", character: "Ross Geller", show: "Friends" },
+            // ── Friends — Joey Tribbiani ───────────────────────────────────
+            { text: "Joey doesn't share food!", character: "Joey Tribbiani", show: "Friends" },
+            { text: "How you doin'?", character: "Joey Tribbiani", show: "Friends" },
+            { text: "It's a moo point. It's like a cow's opinion — it doesn't matter. It's moo.", character: "Joey Tribbiani", show: "Friends" },
+            // ── Friends — Rachel, Monica, Phoebe ──────────────────────────
+            { text: "He's her lobster.", character: "Phoebe Buffay", show: "Friends" },
+            { text: "I'm breezy!", character: "Rachel Green", show: "Friends" },
+            { text: "Welcome to the real world. It sucks. You're gonna love it.", character: "Monica Geller", show: "Friends" },
+            // ── Modern Family — Phil Dunphy ────────────────────────────────
+            { text: "Always look people in the eye, even if they're blind. Just say 'I'm looking you in the eye.'", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "I'm the cool dad, that's my thang. I'm hip, I surf the web, I text LOL: laugh out loud, OMG: oh my God, WTF: why the face.", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "I don't need easy. I just need possible.", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "More like east coast, west coast, you feel me?", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "If you love someone, set them free. Unless it's a tiger.", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "Life is not measured by the number of breaths you take, but by the moments that take your breath away. And by 'moments' I mean 'me.'", character: "Phil Dunphy", show: "Modern Family" },
+            { text: "I'm a little bit of a trailblazer.", character: "Phil Dunphy", show: "Modern Family" },
+            // ── Modern Family — Claire Dunphy ──────────────────────────────
+            { text: "What's the plan, Phil?", character: "Claire Dunphy", show: "Modern Family" },
+            // ── Big Bang Theory — Sheldon Cooper ───────────────────────────
+            { text: "I'm not crazy. My mother had me tested.", character: "Sheldon Cooper", show: "Big Bang Theory" },
+            { text: "Bazinga!", character: "Sheldon Cooper", show: "Big Bang Theory" },
+            { text: "One cries because one is sad. I cry because others are stupid, and that makes me sad.", character: "Sheldon Cooper", show: "Big Bang Theory" },
+            // ── Brooklyn Nine-Nine ─────────────────────────────────────────
+            { text: "Cool cool cool cool cool cool. No doubt no doubt no doubt.", character: "Jake Peralta", show: "Brooklyn Nine-Nine" },
+            { text: "NINE NINE!", character: "The Squad", show: "Brooklyn Nine-Nine" },
+            { text: "I've only had iced coffee for a day and a half, but if anything happened to it, I would kill everyone in this room and then myself.", character: "Rosa Diaz", show: "Brooklyn Nine-Nine" },
+        ];
+
+        let activeFilter = 'all';
+        let filteredQuotes = [...quotes];
+        let currentIdx = 0;
+
+        function getFiltered() {
+            return activeFilter === 'all' ? [...quotes] : quotes.filter(q => q.show === activeFilter);
+        }
+
+        function displayQuote(idx) {
+            const card = document.getElementById('quote-card');
+            card.classList.add('fading');
+            setTimeout(() => {
+                const q = filteredQuotes[idx];
+                document.getElementById('q-text-display').textContent = '\u201c' + q.text + '\u201d';
+                document.getElementById('q-char-name').textContent = '\u2014 ' + q.character;
+                const badge = document.getElementById('q-show-badge');
+                badge.textContent = q.show;
+                badge.setAttribute('data-show', q.show);
+                document.getElementById('q-counter').textContent = (idx + 1) + ' / ' + filteredQuotes.length;
+                card.classList.remove('fading');
+            }, 280);
+        }
+
+        function show(idx) {
+            currentIdx = ((idx % filteredQuotes.length) + filteredQuotes.length) % filteredQuotes.length;
+            displayQuote(currentIdx);
+        }
+
+        // Init
+        filteredQuotes = getFiltered();
+        show(0);
+
+        // Navigation
+        document.getElementById('q-next').addEventListener('click', () => show(currentIdx + 1));
+        document.getElementById('q-prev').addEventListener('click', () => show(currentIdx - 1));
+
+        // Keyboard arrows
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') show(currentIdx + 1);
+            if (e.key === 'ArrowLeft')  show(currentIdx - 1);
+        });
+
+        // Random button
+        document.getElementById('btn-shuffle').addEventListener('click', () => {
+            show(Math.floor(Math.random() * filteredQuotes.length));
+        });
+
+        // Filter tabs
+        document.getElementById('show-filters').addEventListener('click', function(e) {
+            const btn = e.target.closest('.show-filter');
+            if (!btn) return;
+            activeFilter = btn.dataset.show;
+            document.querySelectorAll('.show-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filteredQuotes = getFiltered();
+            currentIdx = 0;
+            displayQuote(0);
+        });
+
+        // Auto-toast quotes every 10 seconds
+        const SHOW_COLORS = {
+            'The Office':        '#22c55e',
+            'Friends':           '#a855f7',
+            'Big Bang Theory':   '#3b82f6',
+            'Brooklyn Nine-Nine':'#fb923c',
+            'Modern Family':     '#ec4899',
+        };
+        let autoToastIdx = Math.floor(Math.random() * quotes.length);
+        function fireAutoToast() {
+            autoToastIdx = (autoToastIdx + 1) % quotes.length;
+            const q = quotes[autoToastIdx];
+            const dot = SHOW_COLORS[q.show] || '#fbbf24';
+            showToast(
+                '\u201c' + q.text + '\u201d' +
+                '<div class="toast-meta" style="margin-top:0.45rem;">' +
+                '<span class="toast-show-dot" style="background:' + dot + ';"></span>' +
+                '<span class="toast-char">\u2014 ' + q.character + '</span>' +
+                '</div>',
+                7000
+            );
+        }
+        // First toast after 6s, then repeat every 11s
+        setTimeout(function tick() { fireAutoToast(); setTimeout(tick, 11000); }, 6000);
+    })();
+    </script>
+
+</body>
+
+</html>

@@ -263,3 +263,62 @@ function initParticles(canvas) {
     draw();
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Toast System
+   ══════════════════════════════════════════════════════════════════ */
+const _toastContainer = (function() {
+    const el = document.createElement('div');
+    el.className = 'toast-container';
+    document.body.appendChild(el);
+    return el;
+})();
+
+function showToast(html, duration) {
+    duration = duration || 5000;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = html;
+    _toastContainer.appendChild(toast);
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() { toast.classList.add('toast-show'); });
+    });
+    function dismiss() {
+        toast.classList.remove('toast-show');
+        toast.classList.add('toast-hide');
+        toast.addEventListener('transitionend', function() { toast.remove(); }, { once: true });
+    }
+    var timer = setTimeout(dismiss, duration);
+    toast.addEventListener('click', function() { clearTimeout(timer); dismiss(); });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Konami Code — ↑↑↓↓←→←→BA
+   ══════════════════════════════════════════════════════════════════ */
+(function() {
+    var KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    var pos = 0;
+    document.addEventListener('keydown', function(e) {
+        if (e.key === KONAMI[pos]) {
+            pos++;
+            if (pos === KONAMI.length) {
+                pos = 0;
+                var isEasterPage = location.pathname.replace(/\\/g, '/').endsWith('easter-eggs.html');
+                if (isEasterPage) {
+                    showToast(
+                        '<div class="toast-konami-text">🎮 Konami Code! You really are feeling curious.</div>' +
+                        '<div class="toast-meta"><span class="toast-char">Respect. Now watch the DVD logo.</span></div>',
+                        6000
+                    );
+                } else {
+                    showToast(
+                        '<div class="toast-konami-text">🎮 Konami Code unlocked!</div>' +
+                        '<div class="toast-meta"><a href="easter-eggs.html" class="toast-konami-link">➜ Visit the Easter Eggs page</a></div>',
+                        7000
+                    );
+                }
+            }
+        } else {
+            pos = (e.key === KONAMI[0]) ? 1 : 0;
+        }
+    });
+})();

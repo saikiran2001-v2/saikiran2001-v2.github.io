@@ -53,6 +53,11 @@
                 <li><a href="rust-playground.html">My Rust Playground</a></li>
                 <li><a href="blog.html">Blogs</a></li>
                 <li><a href="#contact" class="btn btn-primary">Contact Me</a></li>
+                <li>
+                    <a href="easter-eggs.html" class="theme-toggle-btn" aria-label="Easter eggs" title="I'm feeling curious" style="text-decoration:none;">
+                        <i class="fas fa-egg"></i>
+                    </a>
+                </li>
                 <!-- Theme Toggle -->
                 <li>
                     <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch theme" title="Switch theme">
@@ -277,7 +282,7 @@
                         <a href="ledger-demo.html" class="ias-demo-btn" onclick="event.stopPropagation();"><i class="fas fa-play"></i> Try Live Demo</a>
                     </div>
                 </article>
-                <article class="project-card glass-card" onclick="window.location.href='rust-playground.html'" style="cursor:pointer;">
+                <article class="project-card glass-card" onclick="window.location.href='tip-calc-demo.html'" style="cursor:pointer;">
                     <div class="project-info">
                         <h3>Tip Calculator</h3>
                         <p><strong>WebAssembly-powered</strong> tip calculator built in Rust — split bills, set tip percentages, all computed by compiled WASM.</p>
@@ -285,9 +290,14 @@
                             <i class="fab fa-rust"></i>
                             <i class="fas fa-calculator"></i>
                         </div>
-                        <a href="rust-playground.html" class="ias-demo-btn" onclick="event.stopPropagation();">
-                            <i class="fas fa-play"></i> Try Now
-                        </a>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                            <a href="tip-calc-demo.html" class="ias-demo-btn" onclick="event.stopPropagation();">
+                                <i class="fas fa-play"></i> GUI Demo
+                            </a>
+                            <a href="rust-playground.html" class="ias-demo-btn" onclick="event.stopPropagation();" style="background:transparent;border:1px solid var(--accent-primary);color:var(--accent-primary);">
+                                <i class="fas fa-terminal"></i> CLI Version
+                            </a>
+                        </div>
                     </div>
                 </article>
                 <article class="project-card glass-card" onclick="window.location.href='rust-playground.html'" style="cursor:pointer;">
