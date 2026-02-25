@@ -1,5 +1,5 @@
 // Service Worker — Cache-first for assets, network-first for pages
-const CACHE_NAME = 'saikiran-v1';
+const CACHE_NAME = 'saikiran-v2';
 
 const PRECACHE_URLS = [
     './',
@@ -8,6 +8,7 @@ const PRECACHE_URLS = [
     './404.html',
     './assets/css/style.css',
     './assets/js/script.js',
+    './assets/js/quotes.js',
     './assets/favicon.svg',
 ];
 

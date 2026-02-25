@@ -266,19 +266,23 @@ function initParticles(canvas) {
 /* ══════════════════════════════════════════════════════════════════
    Toast System
    ══════════════════════════════════════════════════════════════════ */
-const _toastContainer = (function() {
-    const el = document.createElement('div');
-    el.className = 'toast-container';
-    document.body.appendChild(el);
-    return el;
-})();
+var _toastContainer = null;
+
+function _getToastContainer() {
+    if (!_toastContainer) {
+        _toastContainer = document.createElement('div');
+        _toastContainer.className = 'toast-container';
+        document.body.appendChild(_toastContainer);
+    }
+    return _toastContainer;
+}
 
 function showToast(html, duration) {
     duration = duration || 5000;
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = html;
-    _toastContainer.appendChild(toast);
+    _getToastContainer().appendChild(toast);
     requestAnimationFrame(function() {
         requestAnimationFrame(function() { toast.classList.add('toast-show'); });
     });
