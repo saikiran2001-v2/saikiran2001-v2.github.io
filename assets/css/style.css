@@ -194,6 +194,7 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 body {
@@ -1108,7 +1109,7 @@ footer {
     .nav-links {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
         width: 70%;
         max-width: 320px;
         height: 100vh;
@@ -1118,12 +1119,15 @@ footer {
         border-left: 1px solid var(--surface-border);
         flex-direction: column;
         justify-content: center;
-        transition: var(--transition);
+        transition: transform 0.3s ease, visibility 0.3s ease;
         box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+        transform: translateX(100%);
+        visibility: hidden;
     }
 
     .nav-links.active {
-        right: 0;
+        transform: translateX(0);
+        visibility: visible;
     }
 
     .nav-dropdown-toggle {
