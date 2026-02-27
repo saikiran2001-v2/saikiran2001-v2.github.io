@@ -307,7 +307,7 @@ function _getToastContainer() {
     if (!_toastContainer) {
         _toastContainer = document.createElement('div');
         _toastContainer.className = 'toast-container';
-        document.body.appendChild(_toastContainer);
+        document.documentElement.appendChild(_toastContainer);
     }
     return _toastContainer;
 }

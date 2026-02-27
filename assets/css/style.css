@@ -168,7 +168,6 @@
     background: rgba(8, 11, 20, 0.82);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="glass"] .theme-toggle-btn {
@@ -1004,9 +1003,10 @@ footer {
     background: var(--surface-color);
     border: 1px solid var(--surface-border);
     border-left: 3px solid #fbbf24;
+    color: var(--text-main);
     border-radius: 12px;
     padding: 0.9rem 1.1rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
     pointer-events: auto;
     transform: translateX(120%);
     opacity: 0;
@@ -1066,7 +1066,9 @@ footer {
     text-decoration: none;
 }
 
-.toast-konami-link:hover { text-decoration: underline; }
+.toast-konami-link:hover {
+    text-decoration: underline;
+}
 
 .footer-socials {
     display: flex;
@@ -1250,7 +1252,9 @@ footer {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== Reading Progress Bar ===== */
@@ -1280,13 +1284,27 @@ footer {
 }
 
 @keyframes vt-slide-out {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-12px); }
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
 }
 
 @keyframes vt-slide-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ===== Skip to Content (Accessibility) ===== */
@@ -1400,8 +1418,13 @@ footer {
     padding: 0.5rem 0;
 }
 
-.form-status.success { color: #22c55e; }
-.form-status.error   { color: #ef4444; }
+.form-status.success {
+    color: #22c55e;
+}
+
+.form-status.error {
+    color: #ef4444;
+}
 
 [data-theme="light"] .form-group input,
 [data-theme="light"] .form-group textarea {
@@ -1419,7 +1442,7 @@ footer {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(59,130,246,0.05), rgba(139,92,246,0.05));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
     z-index: 0;
 }
 
@@ -1447,17 +1470,55 @@ footer {
     border: 1px solid var(--code-border);
 }
 
-.post-body code .comment  { color: var(--code-comment); font-style: italic; }
-.post-body code .keyword  { color: var(--code-keyword); font-weight: 600; }
-.post-body code .string   { color: var(--code-string); }
-.post-body code .func     { color: var(--code-function); }
-.post-body code .type     { color: var(--code-type); }
-.post-body code .num      { color: var(--code-number); }
+.post-body code .comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.post-body code .keyword {
+    color: var(--code-keyword);
+    font-weight: 600;
+}
+
+.post-body code .string {
+    color: var(--code-string);
+}
+
+.post-body code .func {
+    color: var(--code-function);
+}
+
+.post-body code .type {
+    color: var(--code-type);
+}
+
+.post-body code .num {
+    color: var(--code-number);
+}
 
 /* Checkout demo source code also uses these token classes */
-.source-viewer .comment  { color: var(--code-comment); font-style: italic; }
-.source-viewer .keyword  { color: var(--code-keyword); font-weight: 600; }
-.source-viewer .string   { color: var(--code-string); }
-.source-viewer .func     { color: var(--code-function); }
-.source-viewer .type     { color: var(--code-type); }
-.source-viewer .num      { color: var(--code-number); }
+.source-viewer .comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.source-viewer .keyword {
+    color: var(--code-keyword);
+    font-weight: 600;
+}
+
+.source-viewer .string {
+    color: var(--code-string);
+}
+
+.source-viewer .func {
+    color: var(--code-function);
+}
+
+.source-viewer .type {
+    color: var(--code-type);
+}
+
+.source-viewer .num {
+    color: var(--code-number);
+}
