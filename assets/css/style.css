@@ -194,11 +194,7 @@
 
 html {
     overflow-x: hidden;
-}
-
-/* Only smooth-scroll when navigating to an anchor via click */
-html:focus-within {
-    scroll-behavior: smooth;
+    overscroll-behavior: none;
 }
 
 body {
@@ -207,6 +203,7 @@ body {
     color: var(--text-main);
     line-height: 1.6;
     overflow-x: hidden;
+    overscroll-behavior: none;
     opacity: 0;
     transform: translateY(6px);
     transition: opacity 0.12s ease, transform 0.12s ease;
@@ -600,6 +597,8 @@ img {
     pointer-events: none;
     -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    will-change: transform;
+    contain: strict;
 }
 
 .blur-circle {
@@ -608,6 +607,7 @@ img {
     filter: blur(80px);
     opacity: 0.4;
     animation: float 10s infinite ease-in-out;
+    will-change: transform;
 }
 
 .circle-1 {

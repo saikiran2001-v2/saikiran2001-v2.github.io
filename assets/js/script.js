@@ -48,6 +48,16 @@ function copyEmail(btn) {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Smooth scroll for anchor links only ───────────────────────────────────
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link) return;
+        const target = document.querySelector(link.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+    });
+
     // ── Theme Management ──────────────────────────────────────────────────────
     const THEMES = ['midnight', 'blue', 'light', 'glass'];
     const THEME_ICONS = {
