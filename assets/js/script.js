@@ -43,7 +43,7 @@ function copyEmail(btn) {
         e.preventDefault();
         document.body.classList.remove('page-ready');
         document.body.classList.add('page-exit');
-        setTimeout(function () { window.location.href = href; }, 300);
+        setTimeout(function () { window.location.href = href; }, 120);
     });
 })();
 
