@@ -164,6 +164,13 @@
     box-shadow: 0 0 0 3px rgba(109, 213, 250, 0.15);
 }
 
+[data-theme="glass"] .nav-links {
+    background: rgba(8, 11, 20, 0.82);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 [data-theme="glass"] .theme-toggle-btn {
     border-color: rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
