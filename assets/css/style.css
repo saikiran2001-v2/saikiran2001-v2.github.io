@@ -194,6 +194,7 @@
 html {
     overflow-x: hidden;
     overscroll-behavior: none;
+    touch-action: pan-y;
 }
 
 body {
@@ -203,6 +204,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     overscroll-behavior: none;
+    touch-action: pan-y;
     opacity: 0;
     transform: translateY(6px);
     transition: opacity 0.12s ease, transform 0.12s ease;
@@ -596,8 +598,6 @@ img {
     pointer-events: none;
     -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    will-change: transform;
-    contain: strict;
 }
 
 .blur-circle {
