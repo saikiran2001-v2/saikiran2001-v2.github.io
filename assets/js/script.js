@@ -24,40 +24,7 @@ function copyEmail(btn) {
     });
 }
 
-// ── Page Fade Transition ──────────────────────────────────────────────────
-(function () {
-    document.body.classList.add('page-ready');
-
-    document.addEventListener('click', function (e) {
-        const link = e.target.closest('a');
-        if (!link) return;
-        const href = link.getAttribute('href');
-        if (!href) return;
-
-        // Skip external links, new-tab links, anchors, downloads, mailto, etc.
-        if (link.target === '_blank' || link.hasAttribute('download') ||
-            href.startsWith('#') || href.startsWith('mailto:') ||
-            href.startsWith('javascript:') || href.startsWith('http')) return;
-
-        // Internal page navigation — fade out then navigate
-        e.preventDefault();
-        document.body.classList.remove('page-ready');
-        document.body.classList.add('page-exit');
-        setTimeout(function () { window.location.href = href; }, 120);
-    });
-})();
-
 document.addEventListener('DOMContentLoaded', () => {
-    // ── Smooth scroll for anchor links only ───────────────────────────────────
-    document.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href^="#"]');
-        if (!link) return;
-        const target = document.querySelector(link.getAttribute('href'));
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-    });
-
     // ── Theme Management ──────────────────────────────────────────────────────
     const THEMES = ['midnight', 'blue', 'light', 'glass'];
     const THEME_ICONS = {
@@ -307,7 +274,7 @@ function _getToastContainer() {
     if (!_toastContainer) {
         _toastContainer = document.createElement('div');
         _toastContainer.className = 'toast-container';
-        document.documentElement.appendChild(_toastContainer);
+        document.body.appendChild(_toastContainer);
     }
     return _toastContainer;
 }
