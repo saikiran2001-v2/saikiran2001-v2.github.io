@@ -24,6 +24,29 @@ function copyEmail(btn) {
     });
 }
 
+// ── Page Fade Transition ──────────────────────────────────────────────────
+(function () {
+    document.body.classList.add('page-ready');
+
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        // Skip external links, new-tab links, anchors, downloads, mailto, etc.
+        if (link.target === '_blank' || link.hasAttribute('download') ||
+            href.startsWith('#') || href.startsWith('mailto:') ||
+            href.startsWith('javascript:') || href.startsWith('http')) return;
+
+        // Internal page navigation — fade out then navigate
+        e.preventDefault();
+        document.body.classList.remove('page-ready');
+        document.body.classList.add('page-exit');
+        setTimeout(function () { window.location.href = href; }, 300);
+    });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // ── Theme Management ──────────────────────────────────────────────────────
     const THEMES = ['midnight', 'blue', 'light', 'glass'];

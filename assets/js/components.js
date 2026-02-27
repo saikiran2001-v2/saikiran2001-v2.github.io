@@ -47,7 +47,7 @@
                 <li><a href="${href('#linux-works')}"${activeClass('linux-works')}>Linux Works</a></li>
                 <li><a href="rust-playground.html"${activeClass('rust-playground.html')}>My Rust Playground</a></li>
                 <li><a href="blog.html"${activeClass('blog.html')}>Blogs</a></li>
-                <li><a href="${href('#contact')}" class="btn btn-primary">Contact Me</a></li>
+                <li><a href="#contact" class="btn btn-primary">Contact Me</a></li>
                 <li>
                     <a href="easter-eggs.html" class="theme-toggle-btn" aria-label="Easter eggs" title="I'm feeling curious" style="text-decoration:none;">
                         <i class="fas fa-egg"></i>
@@ -70,13 +70,8 @@
     // ── Footer ────────────────────────────────────────────────────────────
     const footerSlot = document.getElementById('site-footer');
     if (footerSlot) {
-        // Pages with #contact anchor on footer need the id
-        const contactPages = ['index.html', '', '/', 'checkout-demo.html', 'ias-demo.html',
-                              'ledger-demo.html', 'tip-calc-demo.html', 'easter-eggs.html'];
-        const footerId = contactPages.includes(page) ? ' id="contact"' : '';
-
         footerSlot.outerHTML = `
-    <footer${footerId}>
+    <footer id="contact">
         <div class="container footer-content">
             <div class="footer-left">
                 <h3>Let's collaborate.</h3>
