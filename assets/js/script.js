@@ -205,7 +205,7 @@ function initParticles(canvas) {
     function randomBetween(a, b) { return a + Math.random() * (b - a); }
 
     function buildParticles() {
-        const count = Math.floor((canvas.width * canvas.height) / 12000);
+        const count = Math.floor((canvas.width * canvas.height) / 18000);
         particles = Array.from({ length: count }, () => ({
             x:  randomBetween(0, canvas.width),
             y:  randomBetween(0, canvas.height),
