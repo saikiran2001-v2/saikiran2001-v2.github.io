@@ -1815,15 +1815,16 @@
         const themeBtn = document.getElementById('theme-toggle');
 
         function applyTheme(theme) {
-            if (theme === 'midnight') { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); }
-            else { root.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+            if (theme === 'midnight') { root.removeAttribute('data-theme'); }
+            else { root.setAttribute('data-theme', theme); }
+            sessionStorage.setItem('theme', theme);
             if (themeBtn) {
                 themeBtn.querySelector('i').className = `fas ${THEME_ICONS[theme]}`;
                 themeBtn.title = `Theme: ${THEME_LABELS[theme]} — click to switch`;
                 themeBtn.setAttribute('aria-label', `Current theme: ${THEME_LABELS[theme]}. Click to cycle themes.`);
             }
         }
-        applyTheme(localStorage.getItem('theme') || 'midnight');
+        applyTheme(sessionStorage.getItem('theme') || 'glass');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => {
                 const current = root.getAttribute('data-theme') || 'midnight';

@@ -42,15 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const root = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle');
+    localStorage.removeItem('theme'); // clean up old persistence
 
     function applyTheme(theme) {
         if (theme === 'midnight') {
             root.removeAttribute('data-theme');
-            localStorage.removeItem('theme');
         } else {
             root.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
         }
+        sessionStorage.setItem('theme', theme);
         if (themeBtn) {
             const icon = themeBtn.querySelector('i');
             icon.className = `fas ${THEME_ICONS[theme]}`;
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const savedTheme = localStorage.getItem('theme') || 'midnight';
+    const savedTheme = sessionStorage.getItem('theme') || 'glass';
     applyTheme(savedTheme);
 
     if (themeBtn) {
