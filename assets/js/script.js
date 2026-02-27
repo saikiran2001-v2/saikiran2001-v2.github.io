@@ -26,16 +26,18 @@ function copyEmail(btn) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // ── Theme Management ──────────────────────────────────────────────────────
-    const THEMES = ['midnight', 'blue', 'light'];
+    const THEMES = ['midnight', 'blue', 'light', 'glass'];
     const THEME_ICONS = {
         midnight: 'fa-moon',
         blue:     'fa-water',
         light:    'fa-sun',
+        glass:    'fa-gem',
     };
     const THEME_LABELS = {
         midnight: 'Midnight',
         blue:     'Blueish',
         light:    'Light',
+        glass:    'Glass',
     };
 
     const root = document.documentElement;
@@ -219,7 +221,7 @@ function initParticles(canvas) {
 
     function getAccentHex() {
         const theme = document.documentElement.getAttribute('data-theme') || 'midnight';
-        const map = { midnight: '59,130,246', blue: '59,130,246', light: '37,99,235' };
+        const map = { midnight: '59,130,246', blue: '59,130,246', light: '37,99,235', glass: '109,213,250' };
         return map[theme] || '59,130,246';
     }
 
