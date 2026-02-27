@@ -1808,8 +1808,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         // Theme
-        const THEMES = ['midnight', 'blue', 'light'];
-        const THEME_ICONS = { midnight: 'fa-moon', blue: 'fa-water', light: 'fa-sun' };
+        const THEMES = ['midnight', 'blue', 'light', 'glass'];
+        const THEME_ICONS = { midnight: 'fa-moon', blue: 'fa-water', light: 'fa-sun', glass: 'fa-gem' };
+        const THEME_LABELS = { midnight: 'Midnight', blue: 'Blueish', light: 'Light', glass: 'Glass' };
         const root = document.documentElement;
         const themeBtn = document.getElementById('theme-toggle');
 
@@ -1818,7 +1819,8 @@
             else { root.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
             if (themeBtn) {
                 themeBtn.querySelector('i').className = `fas ${THEME_ICONS[theme]}`;
-                themeBtn.title = `Theme: ${theme} — click to switch`;
+                themeBtn.title = `Theme: ${THEME_LABELS[theme]} — click to switch`;
+                themeBtn.setAttribute('aria-label', `Current theme: ${THEME_LABELS[theme]}. Click to cycle themes.`);
             }
         }
         applyTheme(localStorage.getItem('theme') || 'midnight');
